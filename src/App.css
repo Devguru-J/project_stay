@@ -1063,16 +1063,74 @@
   background: rgba(238, 231, 216, 0.055);
 }
 
-.ambient-note {
-  position: fixed;
-  right: 34px;
-  bottom: 18px;
-  display: inline-flex;
+.manual-section {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
+  gap: 28px;
+  max-width: 1380px;
+  margin: 30px auto 0;
+  padding: 26px 0 10px;
+  border-top: 1px solid rgba(238, 231, 216, 0.09);
+}
+
+.manual-section h2 {
+  max-width: 12ch;
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(26px, 3vw, 44px);
+  font-weight: 560;
+  line-height: 1.04;
+  word-break: keep-all;
+}
+
+.manual-section ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.manual-section li {
+  min-height: 116px;
+  padding: 16px;
+  border: 1px solid rgba(238, 231, 216, 0.09);
+  border-radius: 8px;
+  background: rgba(238, 231, 216, 0.035);
+}
+
+.manual-section li span {
+  display: block;
+  margin-bottom: 28px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.manual-section li p {
+  margin: 0;
+  color: var(--soft-ink);
+  font-size: 15px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.manual-footer {
+  grid-column: 2;
+  display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: space-between;
+  gap: 16px;
   color: rgba(238, 231, 216, 0.56);
   font-family: var(--mono);
   font-size: 12px;
+}
+
+.manual-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 
 @keyframes breathe {
@@ -1362,6 +1420,22 @@
   .inline-reactions button {
     flex: 0 0 auto;
   }
+
+  .manual-section {
+    grid-template-columns: 1fr;
+  }
+
+  .manual-section h2 {
+    max-width: 16ch;
+  }
+
+  .manual-section ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .manual-footer {
+    grid-column: 1;
+  }
 }
 
 @media (max-width: 680px) {
@@ -1414,9 +1488,25 @@
     margin-left: 24px;
   }
 
-  .ambient-note {
-    position: static;
-    justify-content: center;
-    margin-top: 14px;
+  .manual-section {
+    margin-top: 22px;
+    padding-bottom: 0;
+  }
+
+  .manual-section ol {
+    grid-template-columns: 1fr;
+  }
+
+  .manual-section li {
+    min-height: 0;
+  }
+
+  .manual-section li span {
+    margin-bottom: 14px;
+  }
+
+  .manual-footer {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

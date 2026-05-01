@@ -612,14 +612,40 @@ function App() {
         </div>
       </section>
 
-      <div className="ambient-note">
-        <button className="exit-room" type="button">
-          <DoorOpen size={16} />
-          조용히 나가기
-        </button>
-        <Sparkles size={15} />
-        <span>밤이 지나면 천천히 사라지는 말들</span>
-      </div>
+      <section className="manual-section" aria-label="사용 설명서">
+        <div>
+          <p className="eyebrow">small manual</p>
+          <h2>여기는 해결보다 동행을 위한 곳</h2>
+        </div>
+        <ol>
+          <li>
+            <span>01</span>
+            <p>지금 마음과 가까운 방을 고릅니다.</p>
+          </li>
+          <li>
+            <span>02</span>
+            <p>한 줄만 남기거나, 아무 말 없이 머물러도 됩니다.</p>
+          </li>
+          <li>
+            <span>03</span>
+            <p>누군가의 말에 조용히 끄덕이고 지나갑니다.</p>
+          </li>
+          <li>
+            <span>04</span>
+            <p>남겨진 말들은 밤이 지나면 천천히 사라집니다.</p>
+          </li>
+        </ol>
+        <div className="manual-footer">
+          <button className="exit-room" type="button">
+            <DoorOpen size={16} />
+            조용히 나가기
+          </button>
+          <span>
+            <Sparkles size={15} />
+            가입 없이, 이름 없이, 잠깐만 같이 있기
+          </span>
+        </div>
+      </section>
     </main>
   )
 }
