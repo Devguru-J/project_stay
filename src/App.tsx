@@ -59,6 +59,16 @@ type Reaction = {
   Icon: LucideIcon
 }
 
+type DroppedObject = {
+  id: string
+  label: string
+  roomId: string
+  x: number
+  delay: number
+  duration: number
+  drift: number
+}
+
 type MessageRow = {
   id: string
   room_id: string
@@ -306,6 +316,7 @@ function App() {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
   const [isMailboxOpen, setIsMailboxOpen] = useState(false)
   const [placedObjects, setPlacedObjects] = useState<Record<string, string | null>>({})
+  const [droppedObjects, setDroppedObjects] = useState<DroppedObject[]>([])
   const [departureLine, setDepartureLine] = useState('오늘은 여기까지만 있어도 충분해요.')
   const [isRoomGlowing, setIsRoomGlowing] = useState(false)
   const [suggestion, setSuggestion] = useState('')
@@ -325,6 +336,7 @@ function App() {
   const messageStreamRef = useRef<HTMLDivElement | null>(null)
   const activeRoomRef = useRef<HTMLElement | null>(null)
   const ambientRef = useRef<AmbientHandle | null>(null)
+  const objectTimersRef = useRef<number[]>([])
   const savedScrollYRef = useRef<number | null>(null)
   const didAlignMobileRoomRef = useRef(false)
 
@@ -660,6 +672,8 @@ function App() {
     return () => {
       ambientRef.current?.stop()
       ambientRef.current = null
+      objectTimersRef.current.forEach((timer) => window.clearTimeout(timer))
+      objectTimersRef.current = []
     }
   }, [])
 
@@ -844,7 +858,28 @@ function App() {
   function placeQuietObject() {
     const currentIndex = placedObject ? roomRitual.objects.indexOf(placedObject) : -1
     const nextObject = roomRitual.objects[(currentIndex + 1) % roomRitual.objects.length]
+    const duration = 5200 + Math.round(Math.random() * 1600)
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+
     setPlacedObjects((current) => ({ ...current, [activeRoom.id]: nextObject }))
+    setDroppedObjects((current) => [
+      ...current.slice(-7),
+      {
+        id,
+        label: nextObject,
+        roomId: activeRoom.id,
+        x: 18 + Math.random() * 64,
+        delay: Math.round(Math.random() * 180),
+        duration,
+        drift: -26 + Math.random() * 52,
+      },
+    ])
+
+    const timer = window.setTimeout(() => {
+      setDroppedObjects((current) => current.filter((object) => object.id !== id))
+      objectTimersRef.current = objectTimersRef.current.filter((currentTimer) => currentTimer !== timer)
+    }, duration + 700)
+    objectTimersRef.current.push(timer)
   }
 
   async function addNod(messageId: string) {
@@ -985,6 +1020,27 @@ function App() {
               <span className="scene-line scene-line--two" />
               <span className="scene-post" />
               <span className="scene-shelter" />
+            </div>
+            <div className="quiet-object-layer" aria-hidden="true">
+              {droppedObjects
+                .filter((object) => object.roomId === activeRoom.id)
+                .map((object) => (
+                  <span
+                    className="quiet-object-drop"
+                    key={object.id}
+                    style={
+                      {
+                        '--drop-x': `${object.x}%`,
+                        '--drop-drift': `${object.drift}px`,
+                        '--drop-delay': `${object.delay}ms`,
+                        '--drop-duration': `${object.duration}ms`,
+                      } as CSSProperties
+                    }
+                  >
+                    <i />
+                    <small>{object.label}</small>
+                  </span>
+                ))}
             </div>
             <div className="room-ambience" aria-hidden="true">
               <span className="window-light window-light--one" />
