@@ -816,10 +816,11 @@ function App() {
                 type="button"
               >
                 <span className="room-card__meta">
-                  <span>{roomCounts[room.id] || 0}명</span>
                   {activeRoom.id === room.id ? (
-                    <span>{stayMinutes}분째 머무는중</span>
-                  ) : null}
+                    <span>{roomCounts[room.id] || 0}명과 {stayMinutes}분째 머무는 중</span>
+                  ) : (
+                    <span>{roomCounts[room.id] || 0}명</span>
+                  )}
                 </span>
                 <strong>{room.name}</strong>
                 <small>{room.mood}</small>

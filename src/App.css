@@ -222,7 +222,7 @@
 
 .room-card__meta {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   color: var(--muted);
   font-family: var(--mono);
   font-size: 12px;
