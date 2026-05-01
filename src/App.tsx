@@ -930,8 +930,8 @@ function App() {
                 type="button"
               >
                 <Sparkles size={16} />
-                <span>말 없이 남기기</span>
-                <small>{isReactionTrayOpen ? '닫기' : '열기'}</small>
+                <span>공감 남기기</span>
+                <small>{isReactionTrayOpen ? '접기' : '+'}</small>
               </button>
 
               <div className="inline-reactions" id="room-reactions" aria-label="말 없는 반응">
