@@ -288,6 +288,7 @@ function App() {
   const seconds = String(secondsLeft % 60).padStart(2, '0')
   const ambienceLabel = ROOM_AMBIENCE[activeRoom.id] ?? '낮은 빗소리'
   const isSendDisabled = draft.trim().length === 0 || sendCooldownLeft > 0
+  const stayMinutes = Math.max(1, Math.floor((now - enteredAt) / 60000) + 1)
 
 
   useEffect(() => {
@@ -641,9 +642,11 @@ function App() {
   }
 
   function enterRoom(roomId: string) {
+    const nextEnteredAt = Number(new Date())
     setActiveRoomId(roomId)
     setSecondsLeft(20 * 60)
-    setEnteredAt(Number(new Date()))
+    setEnteredAt(nextEnteredAt)
+    setNow(nextEnteredAt)
     if (isLeaving) setIsLeaving(false)
   }
 
@@ -815,7 +818,7 @@ function App() {
                 <span className="room-card__meta">
                   <span>{roomCounts[room.id] || 0}명</span>
                   {activeRoom.id === room.id ? (
-                    <span>{Math.floor((now - enteredAt) / 60000)}분째 머무는중</span>
+                    <span>{stayMinutes}분째 머무는중</span>
                   ) : null}
                 </span>
                 <strong>{room.name}</strong>
