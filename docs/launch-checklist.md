@@ -39,11 +39,13 @@
 
 ## 4. Pre-launch polish
 
-- [ ] Generate a real `og:image` (1200×630 PNG) and add `<meta property="og:image">` in `index.html`.
-- [ ] Self-host Pretendard Variable WOFF2 (currently CDN; add `font-display: swap` + local fallback).
+- [x] Add a real share image via `public/og-image.png`.
+- [x] Add Open Graph, Twitter card, canonical URL, JSON-LD, `robots.txt`, and `sitemap.xml`.
+- [x] Add a small manual/usage copy for first-time visitors.
+- [x] Configure the public domain copy around `https://staytogether.net/`.
+- [ ] Self-host Pretendard Variable WOFF2 if CDN dependency should be removed.
 - [ ] Add a privacy-respecting analytics layer (Cloudflare Web Analytics or Plausible). No event-level content.
-- [ ] Decide on a domain (e.g. `잠깐같이있기.com` / `stay.example.app`) and configure CF Pages custom domain + SSL.
-- [ ] Add a small "이곳의 약속" copy into the homepage footer for first-time visitors who don't open the modal.
+- [ ] Test link previews in KakaoTalk, iMessage, X, Facebook, Discord, and Slack after deploy.
 
 ## 5. Post-launch monitoring
 
