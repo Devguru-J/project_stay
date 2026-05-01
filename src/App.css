@@ -224,8 +224,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: min(68vh, 712px);
-  min-height: 612px;
+  height: 100%;
   padding: 30px 32px 28px;
   overflow: hidden;
   border: 1px solid var(--line);
