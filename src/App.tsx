@@ -1052,42 +1052,44 @@ function App() {
               )}
             </div>
 
-            {lastReaction ? (
-              <div className="reaction-dock" aria-live="polite">
-                <Sparkles size={15} />
-                <span>{lastReaction} 남김</span>
+            <div className="room-actions">
+              {lastReaction ? (
+                <div className="reaction-dock" aria-live="polite">
+                  <Sparkles size={15} />
+                  <span>{lastReaction} 남김</span>
+                </div>
+              ) : null}
+
+              <div className="object-ritual" aria-live="polite">
+                <button type="button" onClick={placeQuietObject}>
+                  <Sparkles size={14} />
+                  작은 사물 놓기
+                </button>
+                {placedObject ? <span>{placedObject} 하나가 놓였어요</span> : null}
               </div>
-            ) : null}
 
-            <div className="object-ritual" aria-live="polite">
-              <button type="button" onClick={placeQuietObject}>
-                <Sparkles size={14} />
-                작은 사물 놓기
-              </button>
-              {placedObject ? <span>{placedObject} 하나가 놓였어요</span> : null}
-            </div>
+              <div className={`reaction-tray${isReactionTrayOpen ? ' is-open' : ''}`}>
+                <button
+                  aria-controls="room-reactions"
+                  aria-expanded={isReactionTrayOpen}
+                  className="reaction-tray__toggle"
+                  onClick={() => setIsReactionTrayOpen((current) => !current)}
+                  type="button"
+                >
+                  <Sparkles size={16} />
+                  <span>공감 남기기</span>
+                  <small>{isReactionTrayOpen ? '접기' : '+'}</small>
+                </button>
 
-            <div className={`reaction-tray${isReactionTrayOpen ? ' is-open' : ''}`}>
-              <button
-                aria-controls="room-reactions"
-                aria-expanded={isReactionTrayOpen}
-                className="reaction-tray__toggle"
-                onClick={() => setIsReactionTrayOpen((current) => !current)}
-                type="button"
-              >
-                <Sparkles size={16} />
-                <span>공감 남기기</span>
-                <small>{isReactionTrayOpen ? '접기' : '+'}</small>
-              </button>
-
-              <div className="inline-reactions" id="room-reactions" aria-label="말 없는 반응">
-                {reactions.map(({ Icon, count, hint, label }) => (
-                  <button key={label} onClick={() => addReaction(label)} title={hint} type="button">
-                    <Icon size={16} />
-                    <span>{label}</span>
-                    <small>{count}</small>
-                  </button>
-                ))}
+                <div className="inline-reactions" id="room-reactions" aria-label="말 없는 반응">
+                  {reactions.map(({ Icon, count, hint, label }) => (
+                    <button key={label} onClick={() => addReaction(label)} title={hint} type="button">
+                      <Icon size={16} />
+                      <span>{label}</span>
+                      <small>{count}</small>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
