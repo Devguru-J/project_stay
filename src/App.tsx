@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import './App.css'
+import { supabase } from './lib/supabase'
 
 type Room = {
   id: string
@@ -25,7 +26,7 @@ type Room = {
 }
 
 type Message = {
-  id: number
+  id: string
   roomId: string
   name: string
   text: string
@@ -38,6 +39,26 @@ type Reaction = {
   count: number
   hint: string
   Icon: LucideIcon
+}
+
+type MessageRow = {
+  id: string
+  room_id: string
+  visitor_id: string
+  display_name: string
+  body: string
+  tone: 'soft' | 'warm' | 'quiet'
+  created_at: string
+}
+
+type ReactionRow = {
+  visitor_id: string
+  label: string
+}
+
+type NodRow = {
+  visitor_id: string
+  message_id: string
 }
 
 const rooms: Room[] = [
@@ -81,7 +102,7 @@ const rooms: Room[] = [
 
 const initialMessages: Message[] = [
   {
-    id: 1,
+    id: 'local-bench-1',
     roomId: 'bench',
     name: '느린 숨',
     text: '오늘은 설명하지 않아도 되는 쪽에 앉아 있을게요.',
@@ -89,7 +110,7 @@ const initialMessages: Message[] = [
     nods: 5,
   },
   {
-    id: 2,
+    id: 'local-bench-2',
     roomId: 'bench',
     name: '주머니 속 손',
     text: '나도 방금 들어왔어요. 대답 없어도 여기 있을게요.',
@@ -97,7 +118,7 @@ const initialMessages: Message[] = [
     nods: 8,
   },
   {
-    id: 3,
+    id: 'local-rain-1',
     roomId: 'rain',
     name: '젖은 소매',
     text: '비가 오면 마음이 조금 천천히 움직여서 좋아요.',
@@ -105,7 +126,7 @@ const initialMessages: Message[] = [
     nods: 4,
   },
   {
-    id: 4,
+    id: 'local-store-1',
     roomId: 'store',
     name: '삼각김밥',
     text: '큰일은 아닌데 마음이 좀 늦게 따라오는 날이네요.',
@@ -113,7 +134,7 @@ const initialMessages: Message[] = [
     nods: 7,
   },
   {
-    id: 5,
+    id: 'local-bus-1',
     roomId: 'bus',
     name: '막차표',
     text: '집에 가는 길이 멀어서 여기서 숨 좀 고르고 갈래요.',
@@ -123,23 +144,49 @@ const initialMessages: Message[] = [
 ]
 
 const names = ['흐린 컵', '옅은 목소리', '두 번째 의자', '식은 라떼', '느린 발걸음']
+const baseReactions: Reaction[] = [
+  { label: '옆에 있어요', count: 18, hint: '대답 없이 곁에 앉기', Icon: HeartHandshake },
+  { label: '말 안 해도 알아요', count: 6, hint: '설명하지 않아도 괜찮기', Icon: Moon },
+  { label: '천천히 쉬어가요', count: 9, hint: '서두르지 않게 붙잡기', Icon: Umbrella },
+  { label: '오늘도 버텼네', count: 14, hint: '작게 인정해주기', Icon: Sparkles },
+]
+
+function getVisitorId() {
+  const key = 'project-stay-visitor-id'
+  const current = window.localStorage.getItem(key)
+
+  if (current) return current
+
+  const next = window.crypto.randomUUID()
+  window.localStorage.setItem(key, next)
+  return next
+}
+
+function toMessage(row: MessageRow, nods = 0): Message {
+  return {
+    id: row.id,
+    roomId: row.room_id,
+    name: row.display_name,
+    text: row.body,
+    tone: row.tone,
+    nods,
+  }
+}
 
 function App() {
   const [activeRoomId, setActiveRoomId] = useState(rooms[0].id)
   const [messages, setMessages] = useState(initialMessages)
   const [draft, setDraft] = useState('')
   const [secondsLeft, setSecondsLeft] = useState(20 * 60)
-  const [reactions, setReactions] = useState<Reaction[]>([
-    { label: '옆에 있어요', count: 18, hint: '대답 없이 곁에 앉기', Icon: HeartHandshake },
-    { label: '말 안 해도 알아요', count: 6, hint: '설명하지 않아도 괜찮기', Icon: Moon },
-    { label: '천천히 쉬어가요', count: 9, hint: '서두르지 않게 붙잡기', Icon: Umbrella },
-    { label: '오늘도 버텼네', count: 14, hint: '작게 인정해주기', Icon: Sparkles },
-  ])
+  const [reactions, setReactions] = useState<Reaction[]>(baseReactions)
   const [lastReaction, setLastReaction] = useState('옆에 있어요')
+  const [onlineCount, setOnlineCount] = useState<number | null>(null)
+  const [visitorId] = useState(getVisitorId)
   const [companionName] = useState(() => names[Math.floor(Math.random() * names.length)])
 
   const activeRoom = rooms.find((room) => room.id === activeRoomId) ?? rooms[0]
   const roomMessages = messages.filter((message) => message.roomId === activeRoom.id)
+  const displayedPeople = onlineCount ?? activeRoom.people + 1
   const minutes = Math.floor(secondsLeft / 60)
   const seconds = String(secondsLeft % 60).padStart(2, '0')
 
@@ -151,41 +198,244 @@ function App() {
     return () => window.clearInterval(timer)
   }, [])
 
+  useEffect(() => {
+    if (!supabase) return
+
+    const client = supabase
+    let ignore = false
+
+    async function loadRoomMessages() {
+      const { data: messageRows, error: messageError } = await client
+        .from('messages')
+        .select('id, room_id, visitor_id, display_name, body, tone, created_at')
+        .eq('room_id', activeRoomId)
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: true })
+        .limit(40)
+
+      if (ignore) return
+
+      if (messageError) {
+        console.warn('Could not load Supabase messages. Falling back to local messages.', messageError)
+        return
+      }
+
+      const ids = (messageRows ?? []).map((message) => message.id)
+      let nodCounts: Record<string, number> = {}
+
+      if (ids.length > 0) {
+        const { data: nodRows, error: nodError } = await client
+          .from('message_nods')
+          .select('message_id')
+          .in('message_id', ids)
+
+        if (!nodError) {
+          nodCounts = (nodRows ?? []).reduce<Record<string, number>>((counts, nod) => {
+            counts[nod.message_id] = (counts[nod.message_id] ?? 0) + 1
+            return counts
+          }, {})
+        }
+      }
+
+      if (!ignore) {
+        setMessages((messageRows ?? []).map((message) => toMessage(message as MessageRow, nodCounts[message.id] ?? 0)))
+      }
+    }
+
+    async function loadRoomReactions() {
+      const { data, error } = await client
+        .from('room_reactions')
+        .select('label')
+        .eq('room_id', activeRoomId)
+        .gt('expires_at', new Date().toISOString())
+
+      if (ignore || error) return
+
+      const counts = (data ?? []).reduce<Record<string, number>>((current, reaction) => {
+        current[reaction.label] = (current[reaction.label] ?? 0) + 1
+        return current
+      }, {})
+
+      setReactions(baseReactions.map((reaction) => ({ ...reaction, count: counts[reaction.label] ?? reaction.count })))
+    }
+
+    loadRoomMessages()
+    loadRoomReactions()
+
+    return () => {
+      ignore = true
+    }
+  }, [activeRoomId])
+
+  useEffect(() => {
+    if (!supabase) return
+
+    const client = supabase
+    const channel = client
+      .channel(`room-data:${activeRoomId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${activeRoomId}` },
+        (payload) => {
+          const next = toMessage(payload.new as MessageRow)
+          setMessages((current) => (current.some((message) => message.id === next.id) ? current : [...current, next]))
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'room_reactions', filter: `room_id=eq.${activeRoomId}` },
+        (payload) => {
+          const next = payload.new as ReactionRow
+          if (next.visitor_id === visitorId) return
+
+          setReactions((current) =>
+            current.map((reaction) =>
+              reaction.label === next.label ? { ...reaction, count: reaction.count + 1 } : reaction,
+            ),
+          )
+        },
+      )
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'message_nods' }, (payload) => {
+        const next = payload.new as NodRow
+        if (next.visitor_id === visitorId) return
+
+        setMessages((current) =>
+          current.map((message) => (message.id === next.message_id ? { ...message, nods: message.nods + 1 } : message)),
+        )
+      })
+      .subscribe()
+
+    return () => {
+      client.removeChannel(channel)
+    }
+  }, [activeRoomId, visitorId])
+
+  useEffect(() => {
+    if (!supabase) return
+
+    const client = supabase
+    const channel = client.channel(`room-presence:${activeRoomId}`, {
+      config: { presence: { key: visitorId } },
+    })
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState()
+        setOnlineCount(Object.keys(state).length)
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ online_at: new Date().toISOString(), room_id: activeRoomId })
+        }
+      })
+
+    return () => {
+      setOnlineCount(null)
+      client.removeChannel(channel)
+    }
+  }, [activeRoomId, visitorId])
+
   function enterRoom(roomId: string) {
     setActiveRoomId(roomId)
     setSecondsLeft(20 * 60)
   }
 
-  function sendMessage(event: FormEvent<HTMLFormElement>) {
+  async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const text = draft.trim()
 
     if (!text) return
 
-    setMessages((current) => [
-      ...current,
-      {
-        id: Date.now(),
-        roomId: activeRoom.id,
-        name: companionName,
-        text,
+    if (!supabase) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: `local-${Date.now()}`,
+          roomId: activeRoom.id,
+          name: companionName,
+          text,
+          tone: 'soft',
+          nods: 0,
+        },
+      ])
+      setDraft('')
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({
+        room_id: activeRoom.id,
+        visitor_id: visitorId,
+        display_name: companionName,
+        body: text,
         tone: 'soft',
-        nods: 0,
-      },
-    ])
+      })
+      .select('id, room_id, visitor_id, display_name, body, tone, created_at')
+      .single()
+
+    if (error) {
+      console.warn('Could not send Supabase message. Keeping it local for now.', error)
+      setMessages((current) => [
+        ...current,
+        {
+          id: `local-${Date.now()}`,
+          roomId: activeRoom.id,
+          name: companionName,
+          text,
+          tone: 'soft',
+          nods: 0,
+        },
+      ])
+      setDraft('')
+      return
+    }
+
+    if (data) {
+      const next = toMessage(data as MessageRow)
+      setMessages((current) => (current.some((message) => message.id === next.id) ? current : [...current, next]))
+    }
+
     setDraft('')
   }
 
-  function addReaction(label: string) {
+  async function addReaction(label: string) {
     setLastReaction(label)
     setReactions((current) =>
       current.map((reaction) =>
         reaction.label === label ? { ...reaction, count: reaction.count + 1 } : reaction,
       ),
     )
+
+    if (!supabase) return
+
+    const { error } = await supabase.from('room_reactions').insert({
+      room_id: activeRoom.id,
+      visitor_id: visitorId,
+      label,
+    })
+
+    if (error) console.warn('Could not save room reaction.', error)
   }
 
-  function addNod(messageId: number) {
+  async function addNod(messageId: string) {
+    if (!supabase || messageId.startsWith('local-')) {
+      setMessages((current) =>
+        current.map((message) => (message.id === messageId ? { ...message, nods: message.nods + 1 } : message)),
+      )
+      return
+    }
+
+    const { error } = await supabase.from('message_nods').insert({
+      message_id: messageId,
+      visitor_id: visitorId,
+    })
+
+    if (error) {
+      console.warn('Could not save message nod.', error)
+      return
+    }
+
     setMessages((current) =>
       current.map((message) => (message.id === messageId ? { ...message, nods: message.nods + 1 } : message)),
     )
@@ -301,7 +551,7 @@ function App() {
               </span>
               <span>
                 <Waves size={16} />
-                {activeRoom.people + 1}명이 조용히 있음
+                {displayedPeople}명이 조용히 있음
               </span>
               <span>
                 <Music2 size={16} />
