@@ -1018,22 +1018,20 @@
 
 .room-whisper {
   position: absolute;
-  top: 168px;
   right: 32px;
-  z-index: 16;
+  bottom: 132px;
+  z-index: 4;
   display: grid;
   gap: 4px;
-  width: 260px;
+  width: 250px;
   margin: 0;
-  padding: 10px 12px 11px;
+  padding: 9px 12px 10px;
   text-align: right;
   border-radius: 10px 0 0 10px;
   border-right: 1px solid color-mix(in srgb, var(--room-accent), transparent 56%);
   background:
-    linear-gradient(270deg, rgba(20, 27, 25, 0.72), rgba(20, 27, 25, 0.28) 78%, transparent),
+    linear-gradient(270deg, rgba(20, 27, 25, 0.5), rgba(20, 27, 25, 0.14) 76%, transparent),
     linear-gradient(270deg, color-mix(in srgb, var(--room-accent), transparent 88%), transparent);
-  backdrop-filter: blur(5px) saturate(0.88);
-  -webkit-backdrop-filter: blur(5px) saturate(0.88);
 }
 
 .room-whisper span,
@@ -2659,12 +2657,12 @@
   }
 
   .room-whisper {
-    top: 136px;
     right: 12px;
+    bottom: 118px;
     gap: 2px;
-    width: min(42%, 172px);
+    width: min(42%, 164px);
     margin: 0;
-    padding: 7px 9px;
+    padding: 6px 8px;
   }
 
   .room-whisper span,
