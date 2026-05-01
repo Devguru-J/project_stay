@@ -1032,12 +1032,10 @@
   scrollbar-width: thin;
   flex: 1 1 auto;
   pointer-events: auto;
-  border: 1px solid rgba(238, 231, 216, 0.045);
-  border-radius: 10px;
-  background:
-    linear-gradient(90deg, rgba(14, 19, 18, 0.28), rgba(14, 19, 18, 0.08) 72%, transparent);
-  backdrop-filter: blur(1.5px);
-  -webkit-backdrop-filter: blur(1.5px);
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   -webkit-mask-image: linear-gradient(
     to bottom,
     black 0,
