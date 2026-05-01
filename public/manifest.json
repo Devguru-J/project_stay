@@ -1,0 +1,17 @@
+{
+  "name": "잠깐 같이 있기",
+  "short_name": "잠깐 같이 있기",
+  "description": "해결이 아니라 동행. 잠깐만 같이 있다가 가는 익명의 방.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#171b18",
+  "theme_color": "#171b18",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ]
+}

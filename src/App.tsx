@@ -11,6 +11,7 @@ import {
   Volume2,
   VolumeX,
   Waves,
+  X,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import './App.css'
@@ -830,7 +831,7 @@ function App() {
                       aria-label="이 말 가리기"
                       title="이 말은 이 기기에서 가립니다"
                     >
-                      가리기
+                      <X size={12} />
                     </button>
                     <i style={{ animationDelay: `${index * 130}ms` }} />
                   </article>
