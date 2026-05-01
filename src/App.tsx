@@ -308,7 +308,6 @@ function App() {
   const [placedObjects, setPlacedObjects] = useState<Record<string, string | null>>({})
   const [departureLine, setDepartureLine] = useState('오늘은 여기까지만 있어도 충분해요.')
   const [isRoomGlowing, setIsRoomGlowing] = useState(false)
-  const [daySeed] = useState(() => new Date().getDate())
   const [suggestion, setSuggestion] = useState('')
   const [isSendingSuggestion, setIsSendingSuggestion] = useState(false)
   const [suggestionSent, setSuggestionSent] = useState(false)
@@ -344,8 +343,6 @@ function App() {
   const ambienceLabel = ROOM_AMBIENCE[activeRoom.id] ?? '낮은 빗소리'
   const stayMinutes = Math.max(1, Math.floor((now - enteredAt) / 60000) + 1)
   const roomRitual = ROOM_RITUALS[activeRoom.id] ?? ROOM_RITUALS.bench
-  const dailyLine = roomRitual.dailyLines[daySeed % roomRitual.dailyLines.length]
-  const roomTrace = roomRitual.traces[Math.floor(stayMinutes / 3) % roomRitual.traces.length]
   const isSendDisabled = draft.trim().length === 0 || sendCooldownLeft > 0
 
 
@@ -1118,12 +1115,6 @@ function App() {
                     </button>
                   ))}
                 </div>
-              </div>
-
-              <div className="room-whisper" aria-live="polite">
-                <span>오늘의 작은 문장</span>
-                <p>{dailyLine}</p>
-                <small>{roomTrace}</small>
               </div>
             </div>
 
