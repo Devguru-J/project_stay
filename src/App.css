@@ -1019,8 +1019,8 @@
 .room-whisper {
   position: absolute;
   right: 0;
-  bottom: calc(100% + 8px);
-  z-index: 3;
+  bottom: 0;
+  z-index: 24;
   display: grid;
   gap: 4px;
   width: 250px;
@@ -1029,6 +1029,7 @@
   text-align: right;
   border-right: 1px solid color-mix(in srgb, var(--room-accent), transparent 56%);
   background: transparent;
+  pointer-events: none;
 }
 
 .room-whisper span,
@@ -2655,7 +2656,7 @@
 
   .room-whisper {
     right: 0;
-    bottom: calc(100% + 6px);
+    bottom: 0;
     gap: 2px;
     width: min(44%, 170px);
     margin: 0;
