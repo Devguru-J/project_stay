@@ -41,19 +41,29 @@
 
 - [x] Add a real share image via `public/og-image.png`.
 - [x] Add Open Graph, Twitter card, canonical URL, JSON-LD, `robots.txt`, and `sitemap.xml`.
+- [x] Add static security headers via `public/_headers`.
 - [x] Add a small manual/usage copy for first-time visitors.
 - [x] Configure the public domain copy around `https://staytogether.net/`.
 - [ ] Self-host Pretendard Variable WOFF2 if CDN dependency should be removed.
 - [ ] Add a privacy-respecting analytics layer (Cloudflare Web Analytics or Plausible). No event-level content.
 - [ ] Test link previews in KakaoTalk, iMessage, X, Facebook, Discord, and Slack after deploy.
 
-## 5. Post-launch monitoring
+## 5. Google Search
+
+1. Open [Google Search Console](https://search.google.com/search-console/).
+2. Add the domain property: `staytogether.net`.
+3. Verify ownership through the DNS TXT record Google provides.
+4. Submit the sitemap URL: `https://staytogether.net/sitemap.xml`.
+5. Use URL Inspection for `https://staytogether.net/` and request indexing.
+6. Keep `robots.txt`, canonical URL, Open Graph image, and JSON-LD in sync with the production domain.
+
+## 6. Post-launch monitoring
 
 - Watch the `message_reports` table weekly. If a single `message_id` accumulates reports, soft-delete it with the service role.
 - Watch error logs (CF Pages → Functions → Logs, Supabase → Logs).
 - If realtime is degrading, check the `messages` table size — `purge_expired()` should keep it under a few thousand rows in normal use.
 
-## 6. Env
+## 7. Env
 
 ```bash
 VITE_SUPABASE_URL=your-project-url

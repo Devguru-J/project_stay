@@ -43,6 +43,35 @@ create index if not exists messages_expires_idx on public.messages (expires_at);
 create index if not exists room_reactions_room_created_idx on public.room_reactions (room_id, created_at desc);
 create index if not exists room_reactions_expires_idx on public.room_reactions (expires_at);
 
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'messages_visitor_id_length') then
+    alter table public.messages
+      add constraint messages_visitor_id_length check (char_length(visitor_id) between 8 and 80) not valid;
+  end if;
+
+  if not exists (select 1 from pg_constraint where conname = 'messages_display_name_length') then
+    alter table public.messages
+      add constraint messages_display_name_length check (char_length(display_name) between 1 and 24) not valid;
+  end if;
+
+  if not exists (select 1 from pg_constraint where conname = 'room_reactions_visitor_id_length') then
+    alter table public.room_reactions
+      add constraint room_reactions_visitor_id_length check (char_length(visitor_id) between 8 and 80) not valid;
+  end if;
+
+  if not exists (select 1 from pg_constraint where conname = 'room_reactions_known_label') then
+    alter table public.room_reactions
+      add constraint room_reactions_known_label
+      check (label in ('옆에 있어요', '말 안 해도 알아요', '천천히 쉬어가요', '오늘도 버텼네')) not valid;
+  end if;
+
+  if not exists (select 1 from pg_constraint where conname = 'message_nods_visitor_id_length') then
+    alter table public.message_nods
+      add constraint message_nods_visitor_id_length check (char_length(visitor_id) between 8 and 80) not valid;
+  end if;
+end $$;
+
 alter table public.rooms enable row level security;
 alter table public.messages enable row level security;
 alter table public.room_reactions enable row level security;
@@ -67,6 +96,9 @@ to anon
 with check (
   expires_at <= now() + interval '24 hours 5 minutes'
   and char_length(body) between 1 and 64
+  and char_length(visitor_id) between 8 and 80
+  and char_length(display_name) between 1 and 24
+  and tone in ('soft', 'warm', 'quiet')
 );
 
 drop policy if exists "room reactions are public read" on public.room_reactions;
@@ -79,7 +111,11 @@ drop policy if exists "visitors can write room reactions" on public.room_reactio
 create policy "visitors can write room reactions"
 on public.room_reactions for insert
 to anon
-with check (expires_at <= now() + interval '24 hours 5 minutes');
+with check (
+  expires_at <= now() + interval '24 hours 5 minutes'
+  and char_length(visitor_id) between 8 and 80
+  and label in ('옆에 있어요', '말 안 해도 알아요', '천천히 쉬어가요', '오늘도 버텼네')
+);
 
 drop policy if exists "message nods are public read" on public.message_nods;
 create policy "message nods are public read"
@@ -91,7 +127,15 @@ drop policy if exists "visitors can nod once" on public.message_nods;
 create policy "visitors can nod once"
 on public.message_nods for insert
 to anon
-with check (true);
+with check (
+  char_length(visitor_id) between 8 and 80
+  and exists (
+    select 1
+    from public.messages
+    where messages.id = message_nods.message_id
+      and messages.expires_at > now()
+  )
+);
 
 insert into public.rooms (id, name, place, mood, accent) values
   ('bench', '퇴근 후 벤치', '아직 식지 않은 가로등 아래', '말없이 나란히 앉기', '#7c9a76'),
@@ -119,11 +163,22 @@ create table if not exists public.suggestions (
 
 alter table public.suggestions enable row level security;
 
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'suggestions_visitor_id_length') then
+    alter table public.suggestions
+      add constraint suggestions_visitor_id_length check (char_length(visitor_id) between 8 and 80) not valid;
+  end if;
+end $$;
+
 drop policy if exists "anyone can suggest" on public.suggestions;
 create policy "anyone can suggest"
 on public.suggestions for insert
 to anon
-with check (true);
+with check (
+  char_length(visitor_id) between 8 and 80
+  and char_length(body) between 1 and 300
+);
 
 -- Soft-moderation queue. Anon can insert. No anon read. Admin/service-role only.
 create table if not exists public.message_reports (
@@ -138,11 +193,27 @@ create index if not exists message_reports_message_idx on public.message_reports
 
 alter table public.message_reports enable row level security;
 
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'message_reports_visitor_id_length') then
+    alter table public.message_reports
+      add constraint message_reports_visitor_id_length check (char_length(visitor_id) between 8 and 80) not valid;
+  end if;
+
+  if not exists (select 1 from pg_constraint where conname = 'message_reports_reason_length') then
+    alter table public.message_reports
+      add constraint message_reports_reason_length check (reason is null or char_length(reason) <= 120) not valid;
+  end if;
+end $$;
+
 drop policy if exists "anyone can report" on public.message_reports;
 create policy "anyone can report"
 on public.message_reports for insert
 to anon
-with check (true);
+with check (
+  char_length(visitor_id) between 8 and 80
+  and (reason is null or char_length(reason) <= 120)
+);
 
 -- Rate limit: 1 message per visitor per 12 seconds
 create or replace function public.enforce_message_rate_limit()
