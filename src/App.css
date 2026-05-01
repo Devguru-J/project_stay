@@ -2,7 +2,7 @@
   position: relative;
   display: block;
   min-height: 100dvh;
-  padding: 34px 44px;
+  padding: clamp(30px, 4.2vh, 46px) 44px 24px;
   overflow-x: hidden;
 }
 
@@ -47,7 +47,7 @@
 .room-stage {
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: clamp(22px, 3vh, 30px);
   min-width: 0;
   max-width: 1380px;
   margin: 0 auto;
@@ -113,8 +113,8 @@
 
 .topbar h1 {
   max-width: 9ch;
-  font-size: clamp(42px, 7vw, 92px);
-  line-height: 0.9;
+  font-size: clamp(42px, 6.3vw, 82px);
+  line-height: 0.94;
   text-wrap: balance;
 }
 
@@ -157,8 +157,8 @@
 
 .room-grid {
   display: grid;
-  grid-template-columns: 246px 764px 260px;
-  gap: 22px;
+  grid-template-columns: 240px minmax(680px, 724px) 252px;
+  gap: 28px;
   justify-content: center;
   align-items: stretch;
 }
@@ -166,7 +166,7 @@
 .room-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   height: 100%;
 }
 
@@ -246,7 +246,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 678.719px;
+  height: clamp(610px, 64vh, 646px);
   padding: 30px 32px 28px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1557,8 +1557,8 @@
 
 .app-footer {
   max-width: 1380px;
-  margin: 24px auto 0;
-  padding: 18px 0 max(6px, env(safe-area-inset-bottom));
+  margin: 18px auto 0;
+  padding: 10px 0 max(4px, env(safe-area-inset-bottom));
   text-align: center;
 }
 
