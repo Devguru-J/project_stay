@@ -1,4 +1,4 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
 
 :root {
   --ink: #eee7d8;
@@ -9,8 +9,10 @@
   --surface-strong: rgba(48, 50, 42, 0.78);
   --line: rgba(238, 231, 216, 0.11);
   --ember: #c98f62;
+  --time-warm: rgba(201, 143, 98, 0.04);
+  --time-cool: rgba(85, 126, 112, 0.04);
   --mono: 'SFMono-Regular', 'Cascadia Code', 'Liberation Mono', monospace;
-  --sans: 'Pretendard', 'Avenir Next', 'Segoe UI', sans-serif;
+  --sans: 'Pretendard Variable', 'Pretendard', 'Avenir Next', 'Segoe UI', sans-serif;
 
   color: var(--ink);
   background: var(--paper);
@@ -43,6 +45,24 @@ input {
 
 button:focus-visible,
 input:focus-visible {
-  outline: 2px solid rgba(238, 231, 216, 0.62);
-  outline-offset: 3px;
+  outline: 1px solid color-mix(in srgb, var(--ember), transparent 36%);
+  outline-offset: 2px;
+}
+
+[class*='timer'],
+.message-nod small,
+.inline-reactions small,
+.room-card__meta {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

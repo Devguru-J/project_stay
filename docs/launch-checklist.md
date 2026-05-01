@@ -1,39 +1,57 @@
 # Launch Checklist
 
-## What to Prepare
+## 1. Supabase
 
-1. Supabase project
-   - Create a new Supabase project.
-   - Run `supabase/schema.sql` in the SQL editor.
-   - Enable Realtime for `messages`, `room_reactions`, and `message_nods`.
-   - Copy the Project URL and anon public key into `.env.local`.
+1. Create a new Supabase project.
+2. Run `supabase/schema.sql` in the SQL editor. It creates:
+   - `rooms`, `messages`, `room_reactions`, `message_nods`, `message_reports`
+   - RLS policies for `anon` (read/insert only what's needed)
+   - Body length check (1–64 chars)
+   - Rate-limit triggers: 1 message / 12s per visitor, 4 reactions / minute per visitor per room
+   - `purge_expired()` cleanup function
+3. **Realtime**: in the Database → Replication settings, enable Realtime for `messages`, `room_reactions`, `message_nods`.
+4. **Cleanup schedule**: enable the `pg_cron` extension and run:
+   ```sql
+   select cron.schedule('purge-expired', '*/15 * * * *', $$select public.purge_expired();$$);
+   ```
+   (or call it from an external scheduler — Cloudflare Cron, GitHub Actions, etc.)
+5. Copy the Project URL and anon public key into `.env.local`.
 
-2. Deployment
-   - Vercel is the fastest path for this Vite app.
-   - Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables.
-   - Connect the GitHub repo `Devguru-J/project_stay`.
+## 2. Deployment (Cloudflare Pages)
 
-3. Safety basics
-   - Keep messages at 64 characters for now.
-   - Keep all entries anonymous.
-   - Add a report/hide button before public launch.
-   - Add a simple profanity filter or moderation queue before sharing widely.
+- Connect the GitHub repo `Devguru-J/project_stay`.
+- Framework preset: `None` (Vite static).
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Root directory: leave blank.
+- Environment variables (Production + Preview):
+  - `VITE_SUPABASE_URL`
+  - `VITE_SUPABASE_ANON_KEY`
+  - `NODE_VERSION` = `20` (also pinned via `.nvmrc`)
+- SPA routing fallback already handled by `public/_redirects`.
 
-4. Product polish
-   - Replace placeholder pixel SVG scenes with final pixel-art PNG/WebP assets.
-   - Decide whether room entries expire after 20 minutes or only messages expire after 24 hours.
-   - Add a lightweight empty state when a room has no messages.
+## 3. Safety (already in code)
 
-## MVP Backend Scope
+- Client-side: 12-second send cooldown, Korean profanity/slur blocklist, spam pattern guard (links, emails, phone-like, repeated chars), per-message local `가리기` (hide).
+- Server-side: rate-limit triggers + RLS check on body length + `expires_at` filter.
+- Soft-moderation queue: anon insert into `message_reports`, no anon read. Admin reviews with the service-role key.
+- Privacy modal exposed via `이곳의 약속` link in the manual aside.
 
-- Read live messages per room.
-- Send anonymous 64-character messages.
-- Show room reaction counts.
-- Let visitors leave quiet reactions.
-- Let visitors nod once per message.
-- Hide expired messages after 24 hours.
+## 4. Pre-launch polish
 
-## Env
+- [ ] Generate a real `og:image` (1200×630 PNG) and add `<meta property="og:image">` in `index.html`.
+- [ ] Self-host Pretendard Variable WOFF2 (currently CDN; add `font-display: swap` + local fallback).
+- [ ] Add a privacy-respecting analytics layer (Cloudflare Web Analytics or Plausible). No event-level content.
+- [ ] Decide on a domain (e.g. `잠깐같이있기.com` / `stay.example.app`) and configure CF Pages custom domain + SSL.
+- [ ] Add a small "이곳의 약속" copy into the homepage footer for first-time visitors who don't open the modal.
+
+## 5. Post-launch monitoring
+
+- Watch the `message_reports` table weekly. If a single `message_id` accumulates reports, soft-delete it with the service role.
+- Watch error logs (CF Pages → Functions → Logs, Supabase → Logs).
+- If realtime is degrading, check the `messages` table size — `purge_expired()` should keep it under a few thousand rows in normal use.
+
+## 6. Env
 
 ```bash
 VITE_SUPABASE_URL=your-project-url

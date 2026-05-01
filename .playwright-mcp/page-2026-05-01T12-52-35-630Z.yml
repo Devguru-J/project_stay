@@ -1,0 +1,118 @@
+- main [ref=e3]:
+  - region "잠깐 같이 있기" [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - paragraph [ref=e7]: stay until it passes
+        - heading "잠깐 같이 있기" [level=1] [ref=e8]
+      - button "소리 켜기" [ref=e9] [cursor=pointer]:
+        - img [ref=e10]
+    - generic [ref=e14]:
+      - complementary "방 목록" [ref=e15]:
+        - button "7명 18분째 퇴근 후 벤치 말없이 나란히 앉기" [ref=e16] [cursor=pointer]:
+          - generic [ref=e17]:
+            - generic [ref=e18]: 7명
+            - generic [ref=e19]: 18분째
+          - strong [ref=e20]: 퇴근 후 벤치
+          - generic [ref=e21]: 말없이 나란히 앉기
+        - button "4명 22분째 비 오는 창가 작게 털어놓기" [ref=e22] [cursor=pointer]:
+          - generic [ref=e23]:
+            - generic [ref=e24]: 4명
+            - generic [ref=e25]: 22분째
+          - strong [ref=e26]: 비 오는 창가
+          - generic [ref=e27]: 작게 털어놓기
+        - button "11명 12분째 새벽 2시 편의점 앞 멍하니 버티기" [ref=e28] [cursor=pointer]:
+          - generic [ref=e29]:
+            - generic [ref=e30]: 11명
+            - generic [ref=e31]: 12분째
+          - strong [ref=e32]: 새벽 2시 편의점 앞
+          - generic [ref=e33]: 멍하니 버티기
+        - button "3명 27분째 막차 기다리는 곳 집에 가는 마음" [ref=e34] [cursor=pointer]:
+          - generic [ref=e35]:
+            - generic [ref=e36]: 3명
+            - generic [ref=e37]: 27분째
+          - strong [ref=e38]: 막차 기다리는 곳
+          - generic [ref=e39]: 집에 가는 마음
+      - generic [ref=e40]:
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - paragraph [ref=e47]: 아직 식지 않은 가로등 아래
+            - heading "퇴근 후 벤치" [level=2] [ref=e48]
+          - generic "남은 시간 20분 00초" [ref=e49]:
+            - img [ref=e50]
+            - generic [ref=e53]: 20:00
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - img [ref=e56]
+            - text: 식은 라떼로 머무는 중
+          - generic [ref=e58]:
+            - img [ref=e59]
+            - text: 8명이 조용히 있음
+          - generic [ref=e63]:
+            - img [ref=e64]
+            - text: 낮은 빗소리
+        - generic [ref=e67]:
+          - article [ref=e68]:
+            - generic [ref=e69]: 느린 숨
+            - paragraph [ref=e70]: 오늘은 설명하지 않아도 되는 쪽에 앉아 있을게요.
+            - button "느린 숨의 말에 공감하기" [ref=e71] [cursor=pointer]:
+              - text: 끄덕
+              - generic [ref=e72]: "5"
+          - article [ref=e74]:
+            - generic [ref=e75]: 주머니 속 손
+            - paragraph [ref=e76]: 나도 방금 들어왔어요. 대답 없어도 여기 있을게요.
+            - button "주머니 속 손의 말에 공감하기" [ref=e77] [cursor=pointer]:
+              - text: 끄덕
+              - generic [ref=e78]: "8"
+        - generic [ref=e80]:
+          - img [ref=e81]
+          - generic [ref=e84]: 옆에 있어요 남김
+        - generic "말 없는 반응" [ref=e85]:
+          - button "옆에 있어요 18" [ref=e86] [cursor=pointer]:
+            - img [ref=e87]
+            - generic [ref=e89]: 옆에 있어요
+            - generic [ref=e90]: "18"
+          - button "말 안 해도 알아요 6" [ref=e91] [cursor=pointer]:
+            - img [ref=e92]
+            - generic [ref=e94]: 말 안 해도 알아요
+            - generic [ref=e95]: "6"
+          - button "천천히 쉬어가요 9" [ref=e96] [cursor=pointer]:
+            - img [ref=e97]
+            - generic [ref=e100]: 천천히 쉬어가요
+            - generic [ref=e101]: "9"
+          - button "오늘도 버텼네 14" [ref=e102] [cursor=pointer]:
+            - img [ref=e103]
+            - generic [ref=e106]: 오늘도 버텼네
+            - generic [ref=e107]: "14"
+        - generic [ref=e108]:
+          - generic [ref=e109]: 한 줄만 놓고 가기
+          - generic [ref=e110]:
+            - textbox "한 줄만 놓고 가기" [ref=e111]:
+              - /placeholder: 여기에 아주 작은 말 하나
+            - button "보내기" [disabled] [ref=e112]:
+              - img [ref=e113]
+          - generic [ref=e116]: 0/64
+      - complementary "사용 설명서" [ref=e117]:
+        - generic [ref=e118]:
+          - paragraph [ref=e119]: small manual
+          - heading "해결보다 동행을 위한 곳" [level=2] [ref=e120]
+        - list [ref=e121]:
+          - listitem [ref=e122]:
+            - generic [ref=e123]: "01"
+            - paragraph [ref=e124]: 지금 마음과 가까운 방을 고릅니다.
+          - listitem [ref=e125]:
+            - generic [ref=e126]: "02"
+            - paragraph [ref=e127]: 한 줄만 남기거나, 아무 말 없이 머물러도 됩니다.
+          - listitem [ref=e128]:
+            - generic [ref=e129]: "03"
+            - paragraph [ref=e130]: 누군가의 말에 조용히 끄덕이고 지나갑니다.
+          - listitem [ref=e131]:
+            - generic [ref=e132]: "04"
+            - paragraph [ref=e133]: 남겨진 말들은 밤이 지나면 천천히 사라집니다.
+        - paragraph [ref=e136]: 잘 모르고 와도 됩니다. 잘 모른 채 가셔도 됩니다.
+        - generic [ref=e137]:
+          - button "조용히 나가기" [ref=e138] [cursor=pointer]:
+            - img [ref=e139]
+            - text: 조용히 나가기
+          - generic [ref=e142]:
+            - img [ref=e143]
+            - text: 가입 없이, 이름 없이, 잠깐만 같이 있기

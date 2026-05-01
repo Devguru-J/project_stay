@@ -1,73 +1,75 @@
-# React + TypeScript + Vite
+# 잠깐 같이 있기
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+해결이 아니라, **동행**.
+설명하지 않아도 되는 자리를 잠깐 빌려주는 익명의 방.
 
-Currently, two official plugins are available:
+가입 없이, 이름 없이, 한 줄만 놓고 가도 됩니다.
+대답이 없어도, 누군가 곁에 앉아 있다는 것 — 그것만으로 됩니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 무엇이 있는 곳
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+네 개의 방이 있고, 그 방엔 늦은 밤의 풍경이 한 장씩 깔려 있습니다.
 
-## Expanding the ESLint configuration
+| 방 | 자리 |
+| --- | --- |
+| 퇴근 후 벤치 | 아직 식지 않은 가로등 아래, 말없이 나란히 앉기 |
+| 비 오는 창가 | 물방울이 천천히 내려오는 자리, 작게 털어놓기 |
+| 새벽 2시 편의점 앞 | 온장고 불빛이 남아 있는 곳, 멍하니 버티기 |
+| 막차 기다리는 곳 | 젖은 노선도 앞, 집에 가는 마음 |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+방마다 한 줄(64자)을 놓을 수 있습니다.
+누군가의 말에는 답장 대신 조용히 **끄덕**이고 지나갑니다.
+남겨진 말은 밤이 지나면 천천히 사라집니다.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 왜 이렇게 만들었나
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+위로하지 않습니다.
+조언하지 않습니다.
+"오늘 어땠어요?" 같은 것도 묻지 않습니다.
+
+대신, 자리만 둡니다.
+오래 머물지 않아도 되고, 아무 말 없이 있어도 됩니다.
+응답하지 않아도 되도록 — 64자 제한, 익명, 24시간 만료, 끄덕 한 번. 모든 제약이 그 메시지입니다.
+
+> 설명하지 않아도 되는 쪽에 앉아 있을게요.
+
+---
+
+## 곁에 두는 도구
+
+- **React 19 + Vite + TypeScript** — 가볍게, 정적으로
+- **Supabase Realtime** — 같은 방의 사람들이 실시간으로 곁에 머무를 수 있도록
+- **Pretendard** — 한국어가 가장 단정해 보이는 글자
+- **Pixel art + paper-grain** — 디지털 안에서도 손맛이 남도록
+
+배포: Cloudflare Pages.
+정책: 익명, 24시간 후 메시지 만료, 광고 없음.
+
+---
+
+## 직접 켜보기
+
+```bash
+npm install
+cp .env.example .env.local      # Supabase URL과 anon key를 채워주세요
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Supabase 프로젝트엔 `supabase/schema.sql`을 한 번 실행하고, `messages` / `room_reactions` / `message_nods` 테이블의 Realtime을 켜둡니다.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+자세한 출시 준비 항목은 [`docs/launch-checklist.md`](./docs/launch-checklist.md).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## 한 가지 약속
+
+이 프로젝트에 기여하거나 카피를 고칠 일이 있다면, 한 가지만 지켜주세요 —
+**큰 목소리를 내지 않습니다.**
+느낌표도, "Elevate"도, 화려한 그라데이션도 어울리지 않습니다.
+누군가 말없이 옆에 앉을 수 있는 자리를, 계속 그렇게 둬주세요.
+
+— 잠깐, 같이 있기.

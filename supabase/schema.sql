@@ -103,3 +103,90 @@ on conflict (id) do update set
   place = excluded.place,
   mood = excluded.mood,
   accent = excluded.accent;
+
+
+-- ============================================================
+-- Production safety — added 2026-05-01
+-- ============================================================
+
+-- Soft-moderation queue. Anon can insert. No anon read. Admin/service-role only.
+create table if not exists public.message_reports (
+  id uuid primary key default gen_random_uuid(),
+  message_id uuid not null references public.messages(id) on delete cascade,
+  visitor_id text not null,
+  reason text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists message_reports_message_idx on public.message_reports (message_id);
+
+alter table public.message_reports enable row level security;
+
+drop policy if exists "anyone can report" on public.message_reports;
+create policy "anyone can report"
+on public.message_reports for insert
+to anon
+with check (true);
+
+-- Rate limit: 1 message per visitor per 12 seconds
+create or replace function public.enforce_message_rate_limit()
+returns trigger
+language plpgsql
+as $$
+begin
+  if exists (
+    select 1 from public.messages
+    where visitor_id = new.visitor_id
+      and created_at > now() - interval '12 seconds'
+  ) then
+    raise exception using
+      errcode = 'P0001',
+      message = '잠깐 숨을 고르고 다시 둬주세요.';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists messages_rate_limit on public.messages;
+create trigger messages_rate_limit
+before insert on public.messages
+for each row execute function public.enforce_message_rate_limit();
+
+-- Rate limit: 4 reactions per minute per visitor per room
+create or replace function public.enforce_reaction_rate_limit()
+returns trigger
+language plpgsql
+as $$
+begin
+  if (
+    select count(*) from public.room_reactions
+    where visitor_id = new.visitor_id
+      and room_id = new.room_id
+      and created_at > now() - interval '1 minute'
+  ) >= 4 then
+    raise exception using
+      errcode = 'P0001',
+      message = '잠시 뒤에 다시 들러주세요.';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists room_reactions_rate_limit on public.room_reactions;
+create trigger room_reactions_rate_limit
+before insert on public.room_reactions
+for each row execute function public.enforce_reaction_rate_limit();
+
+-- Cleanup: schedule via pg_cron extension or external scheduler (e.g. Cloudflare Cron)
+create or replace function public.purge_expired()
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  delete from public.messages where expires_at < now() - interval '1 hour';
+  delete from public.room_reactions where expires_at < now() - interval '1 hour';
+  delete from public.message_nods
+    where message_id not in (select id from public.messages);
+  delete from public.message_reports where created_at < now() - interval '7 days';
+$$;
