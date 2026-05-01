@@ -136,8 +136,9 @@
 
 .room-grid {
   display: grid;
-  grid-template-columns: 246px minmax(0, 1fr) 260px;
+  grid-template-columns: 246px 764px 260px;
   gap: 22px;
+  justify-content: center;
   align-items: stretch;
 }
 
@@ -224,7 +225,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 678.719px;
   padding: 30px 32px 28px;
   overflow: hidden;
   border: 1px solid var(--line);
