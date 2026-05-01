@@ -326,6 +326,8 @@ function App() {
   const messageStreamRef = useRef<HTMLDivElement | null>(null)
   const activeRoomRef = useRef<HTMLElement | null>(null)
   const ambientRef = useRef<AmbientHandle | null>(null)
+  const savedScrollYRef = useRef<number | null>(null)
+  const didAlignMobileRoomRef = useRef(false)
 
   const activeRoom = rooms.find((room) => room.id === activeRoomId) ?? rooms[0]
   const placedObject = placedObjects[activeRoom.id] ?? null
@@ -382,6 +384,18 @@ function App() {
 
     stream.scrollTop = stream.scrollHeight
   }, [roomMessages.length, activeRoomId])
+
+  useEffect(() => {
+    if (didAlignMobileRoomRef.current) return
+    if (!window.matchMedia('(max-width: 680px)').matches) return
+
+    didAlignMobileRoomRef.current = true
+    const id = window.setTimeout(() => {
+      activeRoomRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    }, 420)
+
+    return () => window.clearTimeout(id)
+  }, [])
 
   useEffect(() => {
     if (!supabase) return
@@ -715,6 +729,26 @@ function App() {
     setEnteredAt(nextEnteredAt)
     setNow(nextEnteredAt)
     if (isLeaving) setIsLeaving(false)
+  }
+
+  function handleMessageFocus() {
+    savedScrollYRef.current = window.scrollY
+
+    if (window.matchMedia('(max-width: 680px)').matches) {
+      window.setTimeout(() => {
+        activeRoomRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+      }, 180)
+    }
+  }
+
+  function handleMessageBlur() {
+    const savedY = savedScrollYRef.current
+    savedScrollYRef.current = null
+    if (savedY === null) return
+
+    window.setTimeout(() => {
+      window.scrollTo({ top: savedY, behavior: 'smooth' })
+    }, 260)
   }
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
@@ -1099,10 +1133,12 @@ function App() {
                 <input
                   id="message"
                   maxLength={64}
+                  onBlur={handleMessageBlur}
                   onChange={(event) => {
                     setDraft(event.target.value)
                     if (sendError) setSendError(null)
                   }}
+                  onFocus={handleMessageFocus}
                   placeholder={
                     sendCooldownLeft > 0
                       ? `${sendCooldownLeft}초 뒤에 다시 둘 수 있어요`

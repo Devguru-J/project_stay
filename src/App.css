@@ -1017,15 +1017,23 @@
 }
 
 .room-whisper {
-  align-self: flex-end;
+  position: absolute;
+  top: 168px;
+  right: 32px;
+  z-index: 16;
   display: grid;
   gap: 4px;
-  width: min(38%, 300px);
-  margin-top: 10px;
-  padding: 9px 12px 10px;
+  width: 260px;
+  margin: 0;
+  padding: 10px 12px 11px;
   text-align: right;
+  border-radius: 10px 0 0 10px;
   border-right: 1px solid color-mix(in srgb, var(--room-accent), transparent 56%);
-  background: linear-gradient(270deg, color-mix(in srgb, var(--room-accent), transparent 88%), transparent);
+  background:
+    linear-gradient(270deg, rgba(20, 27, 25, 0.72), rgba(20, 27, 25, 0.28) 78%, transparent),
+    linear-gradient(270deg, color-mix(in srgb, var(--room-accent), transparent 88%), transparent);
+  backdrop-filter: blur(5px) saturate(0.88);
+  -webkit-backdrop-filter: blur(5px) saturate(0.88);
 }
 
 .room-whisper span,
@@ -1054,9 +1062,9 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 540px;
+  max-width: 560px;
   min-height: 0;
-  margin-top: -52px;
+  margin-top: 10px;
   padding: 14px 12px 14px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -2557,10 +2565,11 @@
   }
 
   .active-room {
-    height: min(58dvh, 520px);
-    min-height: 430px;
+    height: min(56dvh, 500px);
+    min-height: 420px;
     padding: 12px;
     border-radius: 10px;
+    scroll-margin-bottom: max(14px, env(safe-area-inset-bottom));
   }
 
   .pixel-scene {
@@ -2650,10 +2659,11 @@
   }
 
   .room-whisper {
-    align-self: flex-end;
+    top: 136px;
+    right: 12px;
     gap: 2px;
-    width: min(45%, 180px);
-    margin-top: 7px;
+    width: min(42%, 172px);
+    margin: 0;
     padding: 7px 9px;
   }
 
@@ -2672,8 +2682,8 @@
   }
 
   .message-stream {
-    margin-top: -42px;
-    max-width: 58%;
+    margin-top: 8px;
+    max-width: 62%;
   }
 
   .message-bubble {
