@@ -96,7 +96,7 @@ function bench(ctx: AudioContext, master: GainNode): Stop {
     cricketGain.gain.cancelScheduledValues(t)
     cricketGain.gain.linearRampToValueAtTime(0, t + FADE)
     setTimeout(() => {
-      try { leaves.stop(); leavesLfo.stop(); cricketSrc.stop() } catch {}
+      try { leaves.stop(); leavesLfo.stop(); cricketSrc.stop() } catch { /* nodes may already be stopped */ }
     }, FADE * 1000 + 50)
   }
 }
@@ -145,7 +145,7 @@ function rain(ctx: AudioContext, master: GainNode): Stop {
     rgain.gain.cancelScheduledValues(t)
     rgain.gain.linearRampToValueAtTime(0, t + FADE)
     setTimeout(() => {
-      try { src.stop(); rumble.stop() } catch {}
+      try { src.stop(); rumble.stop() } catch { /* nodes may already be stopped */ }
     }, FADE * 1000 + 50)
   }
 }
@@ -251,7 +251,7 @@ function store(ctx: AudioContext, master: GainNode): Stop {
       try {
         hum60.stop(); hum120.stop(); buzzSrc.stop(); buzzLfo.stop()
         shimmerSrc.stop(); clickSrc.stop()
-      } catch {}
+      } catch { /* nodes may already be stopped */ }
     }, FADE * 1000 + 50)
   }
 }
@@ -298,7 +298,7 @@ function bus(ctx: AudioContext, master: GainNode): Stop {
     gain.gain.cancelScheduledValues(t)
     gain.gain.linearRampToValueAtTime(0, t + FADE)
     setTimeout(() => {
-      try { drone.stop(); droneOct.stop(); src.stop() } catch {}
+      try { drone.stop(); droneOct.stop(); src.stop() } catch { /* nodes may already be stopped */ }
     }, FADE * 1000 + 50)
   }
 }
@@ -345,7 +345,7 @@ export function startAmbient(initialRoom: string): AmbientHandle {
       await new Promise((r) => setTimeout(r, FADE * 1000 + 80))
       try {
         await ctx.close()
-      } catch {}
+      } catch { /* audio context may already be closed */ }
     },
   }
 }

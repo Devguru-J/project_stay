@@ -77,6 +77,10 @@ type NodRow = {
   message_id: string
 }
 
+type RoomPresence = {
+  room_id?: string
+}
+
 const rooms: Room[] = [
   {
     id: 'bench',
@@ -240,7 +244,8 @@ function App() {
   const [draft, setDraft] = useState('')
   const [secondsLeft, setSecondsLeft] = useState(20 * 60)
   const [reactions, setReactions] = useState<Reaction[]>(baseReactions)
-  const [lastReaction, setLastReaction] = useState('옆에 있어요')
+  const [lastReaction, setLastReaction] = useState<string | null>(null)
+  const [isReactionTrayOpen, setIsReactionTrayOpen] = useState(false)
   const [onlineCount, setOnlineCount] = useState<number | null>(null)
   const [roomCounts, setRoomCounts] = useState<Record<string, number>>({})
   const [enteredAt, setEnteredAt] = useState(() => Date.now())
@@ -272,11 +277,15 @@ function App() {
     () => messages.filter((message) => message.roomId === activeRoom.id && !hiddenIds.has(message.id)),
     [messages, activeRoom.id, hiddenIds],
   )
-  const displayedPeople = onlineCount ?? activeRoom.people + 1
+  const displayedPeople = onlineCount ?? 1
+  const totalOnlineCount = useMemo(() => {
+    return Object.values(roomCounts).reduce((acc, count) => acc + count, 0) || 1
+  }, [roomCounts])
   const minutes = Math.floor(secondsLeft / 60)
   const seconds = String(secondsLeft % 60).padStart(2, '0')
   const ambienceLabel = ROOM_AMBIENCE[activeRoom.id] ?? '낮은 빗소리'
   const isSendDisabled = draft.trim().length === 0 || sendCooldownLeft > 0
+
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -285,6 +294,16 @@ function App() {
 
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    if (!lastReaction) return
+
+    const timer = window.setTimeout(() => {
+      setLastReaction(null)
+    }, 2400)
+
+    return () => window.clearTimeout(timer)
+  }, [lastReaction])
 
   useEffect(() => {
     const stream = messageStreamRef.current
@@ -420,8 +439,9 @@ function App() {
         const counts: Record<string, number> = {}
 
         Object.values(state).forEach((presences) => {
-          presences.forEach((presence: any) => {
-            const rid = presence.room_id
+          presences.forEach((presence) => {
+            const typedPresence = presence as RoomPresence
+            const rid = typedPresence.room_id
             if (rid) {
               counts[rid] = (counts[rid] || 0) + 1
             }
@@ -458,8 +478,8 @@ function App() {
     const root = document.documentElement
     function applyTint() {
       const hour = new Date().getHours()
-      let warm = '0.04'
-      let cool = '0.03'
+      let warm: string
+      let cool: string
       if (hour >= 0 && hour < 5) {
         warm = '0.025'
         cool = '0.075'
@@ -531,7 +551,8 @@ function App() {
 
   useEffect(() => {
     if (secondsLeft === 0 && !isLeaving) {
-      setIsLeaving(true)
+      const id = window.setTimeout(() => setIsLeaving(true), 0)
+      return () => window.clearTimeout(id)
     }
   }, [secondsLeft, isLeaving])
 
@@ -600,7 +621,7 @@ function App() {
   function enterRoom(roomId: string) {
     setActiveRoomId(roomId)
     setSecondsLeft(20 * 60)
-    setEnteredAt(Date.now())
+    setEnteredAt(Number(new Date()))
     if (isLeaving) setIsLeaving(false)
   }
 
@@ -678,6 +699,7 @@ function App() {
 
   async function addReaction(label: string) {
     setLastReaction(label)
+    setIsReactionTrayOpen(false)
     setReactions((current) =>
       current.map((reaction) =>
         reaction.label === label ? { ...reaction, count: reaction.count + 1 } : reaction,
@@ -726,6 +748,10 @@ function App() {
           <div>
             <p className="eyebrow">stay until it passes</p>
             <h1>잠깐 같이 있기</h1>
+          </div>
+          <div className="total-presence">
+            <Sparkles size={14} />
+            <span>{totalOnlineCount}명과 같이 있는 중</span>
           </div>
         </div>
 
@@ -888,19 +914,35 @@ function App() {
               )}
             </div>
 
-            <div className="reaction-dock" aria-live="polite">
-              <Sparkles size={15} />
-              <span>{lastReaction} 남김</span>
-            </div>
+            {lastReaction ? (
+              <div className="reaction-dock" aria-live="polite">
+                <Sparkles size={15} />
+                <span>{lastReaction} 남김</span>
+              </div>
+            ) : null}
 
-            <div className="inline-reactions" aria-label="말 없는 반응">
-              {reactions.map(({ Icon, count, hint, label }) => (
-                <button key={label} onClick={() => addReaction(label)} title={hint} type="button">
-                  <Icon size={16} />
-                  <span>{label}</span>
-                  <small>{count}</small>
-                </button>
-              ))}
+            <div className={`reaction-tray${isReactionTrayOpen ? ' is-open' : ''}`}>
+              <button
+                aria-controls="room-reactions"
+                aria-expanded={isReactionTrayOpen}
+                className="reaction-tray__toggle"
+                onClick={() => setIsReactionTrayOpen((current) => !current)}
+                type="button"
+              >
+                <Sparkles size={16} />
+                <span>말 없이 남기기</span>
+                <small>{isReactionTrayOpen ? '닫기' : '열기'}</small>
+              </button>
+
+              <div className="inline-reactions" id="room-reactions" aria-label="말 없는 반응">
+                {reactions.map(({ Icon, count, hint, label }) => (
+                  <button key={label} onClick={() => addReaction(label)} title={hint} type="button">
+                    <Icon size={16} />
+                    <span>{label}</span>
+                    <small>{count}</small>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <form className="message-form" onSubmit={sendMessage}>
@@ -1101,7 +1143,9 @@ function App() {
       ) : null}
 
       <footer className="app-footer">
-        <p>Created by Devguru-J</p>
+        <p>
+          Created by <span>Devguru-J</span>
+        </p>
       </footer>
     </main>
   )
