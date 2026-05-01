@@ -883,7 +883,10 @@ function App() {
             </ol>
             <div className="manual-aside__closing">
               <span className="horizon" aria-hidden="true" />
-              <p>잘 모르고 와도 됩니다. 잘 모른 채 가셔도 됩니다.</p>
+              <p>
+                잘 모르고 와도 됩니다.<br />
+                잘 모른 채 가셔도 됩니다.
+              </p>
             </div>
             <div className="manual-aside__footer">
               <button className="exit-room" type="button" onClick={leaveRoom}>
