@@ -242,6 +242,8 @@ function App() {
   const [reactions, setReactions] = useState<Reaction[]>(baseReactions)
   const [lastReaction, setLastReaction] = useState('옆에 있어요')
   const [onlineCount, setOnlineCount] = useState<number | null>(null)
+  const [roomCounts, setRoomCounts] = useState<Record<string, number>>({})
+  const [enteredAt, setEnteredAt] = useState(() => Date.now())
   const [visitorId] = useState(getVisitorId)
   const [companionName] = useState(randomCompanionName)
   const [isLeaving, setIsLeaving] = useState(false)
@@ -408,14 +410,26 @@ function App() {
     if (!supabase) return
 
     const client = supabase
-    const channel = client.channel(`room-presence:${activeRoomId}`, {
+    const channel = client.channel('global-presence', {
       config: { presence: { key: visitorId } },
     })
 
     channel
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState()
-        setOnlineCount(Object.keys(state).length)
+        const counts: Record<string, number> = {}
+
+        Object.values(state).forEach((presences) => {
+          presences.forEach((presence: any) => {
+            const rid = presence.room_id
+            if (rid) {
+              counts[rid] = (counts[rid] || 0) + 1
+            }
+          })
+        })
+
+        setRoomCounts(counts)
+        setOnlineCount(counts[activeRoomId] || 1)
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
@@ -586,6 +600,7 @@ function App() {
   function enterRoom(roomId: string) {
     setActiveRoomId(roomId)
     setSecondsLeft(20 * 60)
+    setEnteredAt(Date.now())
     if (isLeaving) setIsLeaving(false)
   }
 
@@ -725,8 +740,10 @@ function App() {
                 type="button"
               >
                 <span className="room-card__meta">
-                  <span>{room.people}명</span>
-                  <span>{room.minutes}분째</span>
+                  <span>{roomCounts[room.id] || 0}명</span>
+                  {activeRoom.id === room.id ? (
+                    <span>{Math.floor((now - enteredAt) / 60000)}분째 머무는중</span>
+                  ) : null}
                 </span>
                 <strong>{room.name}</strong>
                 <small>{room.mood}</small>
@@ -948,7 +965,10 @@ function App() {
             </ol>
             <div className="manual-aside__closing">
               <span className="horizon" aria-hidden="true" />
-              <p>잘 모르고 와도 됩니다. 잘 모른 채 가셔도 됩니다.</p>
+              <p>
+                잘 모르고 와도 됩니다.<br />
+                잘 모른 채 가셔도 됩니다.
+              </p>
             </div>
             <div className="manual-aside__footer">
               <button className="exit-room" type="button" onClick={leaveRoom}>
@@ -1063,7 +1083,16 @@ function App() {
               <button type="button" className="is-primary" onClick={returnFromLeave}>
                 다시 들어가기
               </button>
-              <button type="button" onClick={() => window.close()}>
+              <button
+                type="button"
+                onClick={() => {
+                  window.close()
+                  // Fallback for browsers that block window.close()
+                  if (!window.closed) {
+                    window.location.href = 'about:blank'
+                  }
+                }}
+              >
                 창 닫기
               </button>
             </div>
