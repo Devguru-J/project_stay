@@ -203,6 +203,54 @@ const ROOM_AMBIENCE: Record<string, string> = {
   bus: '낮은 도로 소리',
 }
 
+const ROOM_RITUALS: Record<string, {
+  dailyLines: string[]
+  objects: string[]
+  traces: string[]
+  departureLines: string[]
+}> = {
+  bench: {
+    dailyLines: [
+      '오늘은 대답하지 않아도 괜찮은 쪽으로.',
+      '가로등 아래서는 조금 늦어도 괜찮아요.',
+      '어깨에 힘을 내려놓는 밤이어도 됩니다.',
+    ],
+    objects: ['종이컵', '접힌 영수증', '식은 손난로'],
+    traces: ['방금 누군가 벤치 끝에 앉았다 갔어요.', '가로등이 조금 더 오래 켜져 있어요.', '말 없는 발걸음 하나가 지나갔어요.'],
+    departureLines: ['오늘은 여기까지만 앉아 있어도 충분해요.', '등 뒤의 가로등은 조금 더 켜둘게요.', '잘 다녀와요. 말하지 못한 것도 두고 가도 됩니다.'],
+  },
+  rain: {
+    dailyLines: [
+      '비가 오면 마음도 조금 천천히 움직여요.',
+      '젖은 말은 말리지 않아도 괜찮아요.',
+      '오늘은 창밖을 보는 일만 해도 됩니다.',
+    ],
+    objects: ['젖은 우산', '작은 수건', '창가의 메모'],
+    traces: ['창밖 가로등이 한 번 더 번졌어요.', '누군가 빗소리를 듣다 조용히 갔어요.', '유리창에 작은 물방울이 하나 더 맺혔어요.'],
+    departureLines: ['비가 그칠 때까지 기다리지 않아도 돼요.', '젖은 마음은 여기 잠깐 걸어둘게요.', '오늘 밤의 빗소리는 조금 작게 남겨둘게요.'],
+  },
+  store: {
+    dailyLines: [
+      '새벽의 편의점 앞에서는 아무것도 사지 않아도 돼요.',
+      '불빛이 남아 있는 곳에 잠깐 기대도 됩니다.',
+      '오늘은 멍하니 서 있는 일도 괜찮아요.',
+    ],
+    objects: ['편의점 봉투', '캔커피', '삼각김밥 스티커'],
+    traces: ['간판 불빛이 잠깐 반짝였어요.', '누군가 온장고 앞에서 한숨 쉬고 갔어요.', '자동문 소리가 작게 지나갔어요.'],
+    departureLines: ['빈손으로 나가도 괜찮아요.', '새벽 불빛은 조금 더 남겨둘게요.', '오늘은 멍하니 버틴 것만으로도 충분해요.'],
+  },
+  bus: {
+    dailyLines: [
+      '막차를 기다리는 마음은 조금 늦어도 괜찮아요.',
+      '집에 가는 길이 멀면 여기서 한숨 쉬어도 됩니다.',
+      '젖은 노선도 앞에서 잠깐 멈춰도 돼요.',
+    ],
+    objects: ['막차표', '접힌 노선도', '젖은 버스카드'],
+    traces: ['멀리서 헤드라이트가 한 번 스쳤어요.', '누군가 정류장 의자에 잠깐 기대고 갔어요.', '노선도 아래 작은 발자국이 남았어요.'],
+    departureLines: ['집에 가는 마음을 조금 가볍게 들고 가요.', '다음 버스가 아니어도 괜찮아요.', '정류장 불빛은 조금 더 남아 있을 거예요.'],
+  },
+}
+
 function toMessage(row: MessageRow, nods = 0): Message {
   return {
     id: row.id,
@@ -257,6 +305,10 @@ function App() {
   const [isAmbientOn, setIsAmbientOn] = useState(false)
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
   const [isMailboxOpen, setIsMailboxOpen] = useState(false)
+  const [placedObjects, setPlacedObjects] = useState<Record<string, string | null>>({})
+  const [departureLine, setDepartureLine] = useState('오늘은 여기까지만 있어도 충분해요.')
+  const [isRoomGlowing, setIsRoomGlowing] = useState(false)
+  const [daySeed] = useState(() => new Date().getDate())
   const [suggestion, setSuggestion] = useState('')
   const [isSendingSuggestion, setIsSendingSuggestion] = useState(false)
   const [suggestionSent, setSuggestionSent] = useState(false)
@@ -276,6 +328,7 @@ function App() {
   const ambientRef = useRef<AmbientHandle | null>(null)
 
   const activeRoom = rooms.find((room) => room.id === activeRoomId) ?? rooms[0]
+  const placedObject = placedObjects[activeRoom.id] ?? null
   const roomMessages = useMemo(
     () => messages.filter((message) => message.roomId === activeRoom.id && !hiddenIds.has(message.id)),
     [messages, activeRoom.id, hiddenIds],
@@ -287,8 +340,11 @@ function App() {
   const minutes = Math.floor(secondsLeft / 60)
   const seconds = String(secondsLeft % 60).padStart(2, '0')
   const ambienceLabel = ROOM_AMBIENCE[activeRoom.id] ?? '낮은 빗소리'
-  const isSendDisabled = draft.trim().length === 0 || sendCooldownLeft > 0
   const stayMinutes = Math.max(1, Math.floor((now - enteredAt) / 60000) + 1)
+  const roomRitual = ROOM_RITUALS[activeRoom.id] ?? ROOM_RITUALS.bench
+  const dailyLine = roomRitual.dailyLines[daySeed % roomRitual.dailyLines.length]
+  const roomTrace = roomRitual.traces[Math.floor(stayMinutes / 3) % roomRitual.traces.length]
+  const isSendDisabled = draft.trim().length === 0 || sendCooldownLeft > 0
 
 
   useEffect(() => {
@@ -308,6 +364,16 @@ function App() {
 
     return () => window.clearTimeout(timer)
   }, [lastReaction])
+
+  useEffect(() => {
+    if (!isRoomGlowing) return
+
+    const timer = window.setTimeout(() => {
+      setIsRoomGlowing(false)
+    }, 900)
+
+    return () => window.clearTimeout(timer)
+  }, [isRoomGlowing])
 
   useEffect(() => {
     const stream = messageStreamRef.current
@@ -633,6 +699,7 @@ function App() {
   }
 
   function leaveRoom() {
+    setDepartureLine(roomRitual.departureLines[stayMinutes % roomRitual.departureLines.length])
     setIsLeaving(true)
   }
 
@@ -725,6 +792,7 @@ function App() {
   async function addReaction(label: string) {
     setLastReaction(label)
     setIsReactionTrayOpen(false)
+    setIsRoomGlowing(true)
     setReactions((current) =>
       current.map((reaction) =>
         reaction.label === label ? { ...reaction, count: reaction.count + 1 } : reaction,
@@ -740,6 +808,12 @@ function App() {
     })
 
     if (error) console.warn('Could not save room reaction.', error)
+  }
+
+  function placeQuietObject() {
+    const currentIndex = placedObject ? roomRitual.objects.indexOf(placedObject) : -1
+    const nextObject = roomRitual.objects[(currentIndex + 1) % roomRitual.objects.length]
+    setPlacedObjects((current) => ({ ...current, [activeRoom.id]: nextObject }))
   }
 
   async function addNod(messageId: string) {
@@ -830,7 +904,7 @@ function App() {
 
           <section
             ref={activeRoomRef}
-            className={`active-room active-room--${activeRoom.id}`}
+            className={`active-room active-room--${activeRoom.id}${isRoomGlowing ? ' is-glowing' : ''}`}
             style={{ '--room-accent': activeRoom.accent } as CSSProperties}
           >
             <div className="lantern" aria-hidden="true" />
@@ -926,6 +1000,12 @@ function App() {
               </span>
             </div>
 
+            <div className="room-whisper" aria-live="polite">
+              <span>오늘의 작은 문장</span>
+              <p>{dailyLine}</p>
+              <small>{roomTrace}</small>
+            </div>
+
             <div className="message-stream" ref={messageStreamRef} aria-live="polite">
               {roomMessages.length === 0 ? (
                 <div className="message-empty" role="status">
@@ -978,6 +1058,14 @@ function App() {
                 <span>{lastReaction} 남김</span>
               </div>
             ) : null}
+
+            <div className="object-ritual" aria-live="polite">
+              <button type="button" onClick={placeQuietObject}>
+                <Sparkles size={14} />
+                작은 사물 놓기
+              </button>
+              {placedObject ? <span>{placedObject} 하나가 놓였어요</span> : null}
+            </div>
 
             <div className={`reaction-tray${isReactionTrayOpen ? ' is-open' : ''}`}>
               <button
@@ -1179,6 +1267,7 @@ function App() {
             <p className="eyebrow">stay until it passes</p>
             <h3>오늘은 여기까지.</h3>
             <p>설명하지 않아도 되는 자리에 잠깐 머물다 갑니다. 내일 다시 같이 있어요.</p>
+            <small className="departure-line">{departureLine}</small>
             <div className="departure-actions">
               <button type="button" className="is-primary" onClick={returnFromLeave}>
                 다시 들어가기
