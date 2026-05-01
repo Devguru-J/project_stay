@@ -1,0 +1,46 @@
+:root {
+  --ink: #eee7d8;
+  --soft-ink: #c8beaa;
+  --muted: #9d9484;
+  --paper: #171b18;
+  --surface: rgba(35, 39, 34, 0.66);
+  --surface-strong: rgba(48, 50, 42, 0.78);
+  --line: rgba(238, 231, 216, 0.11);
+  --ember: #c98f62;
+  --mono: 'SFMono-Regular', 'Cascadia Code', 'Liberation Mono', monospace;
+  --sans: 'Avenir Next', 'Pretendard', 'Segoe UI', sans-serif;
+
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--paper);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100dvh;
+  margin: 0;
+}
+
+button,
+input {
+  letter-spacing: 0;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(238, 231, 216, 0.62);
+  outline-offset: 3px;
+}

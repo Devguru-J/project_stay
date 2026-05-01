@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" shape-rendering="crispEdges">
+  <rect width="960" height="540" fill="#171b18"/>
+  <rect y="0" width="960" height="212" fill="#202b2d"/>
+  <rect x="0" y="212" width="960" height="328" fill="#111615"/>
+  <rect x="96" y="104" width="198" height="216" fill="#222a2c"/>
+  <rect x="126" y="138" width="24" height="28" fill="#c98f62"/>
+  <rect x="184" y="176" width="24" height="28" fill="#6f9aa0" opacity=".4"/>
+  <rect x="234" y="238" width="24" height="28" fill="#c98f62" opacity=".78"/>
+  <rect x="650" y="82" width="178" height="238" fill="#222a2c"/>
+  <rect x="682" y="124" width="24" height="28" fill="#c98f62"/>
+  <rect x="746" y="178" width="24" height="28" fill="#c98f62" opacity=".72"/>
+  <rect x="330" y="188" width="312" height="180" fill="#202827"/>
+  <rect x="306" y="172" width="360" height="28" fill="#c98f62"/>
+  <rect x="330" y="200" width="312" height="30" fill="#efe7d8" opacity=".22"/>
+  <rect x="356" y="238" width="94" height="92" fill="#223c42"/>
+  <rect x="472" y="238" width="142" height="92" fill="#223c42"/>
+  <rect x="390" y="256" width="28" height="44" fill="#c98f62" opacity=".84"/>
+  <rect x="516" y="258" width="42" height="44" fill="#e3b174" opacity=".78"/>
+  <rect x="364" y="144" width="142" height="44" fill="#c98f62"/>
+  <rect x="380" y="154" width="26" height="24" fill="#171b18"/>
+  <rect x="418" y="154" width="26" height="24" fill="#171b18"/>
+  <rect x="456" y="154" width="26" height="24" fill="#171b18"/>
+  <rect x="0" y="368" width="960" height="28" fill="#0d1211"/>
+  <rect x="0" y="396" width="960" height="144" fill="#101615"/>
+  <rect x="286" y="388" width="406" height="10" fill="#c98f62" opacity=".34"/>
+  <rect x="450" y="346" width="22" height="42" fill="#b2a593"/>
+  <rect x="450" y="322" width="22" height="22" fill="#c8beaa"/>
+  <rect x="0" y="430" width="960" height="4" fill="#6f9aa0" opacity=".16"/>
+  <rect x="214" y="456" width="152" height="4" fill="#c98f62" opacity=".22"/>
+  <rect x="540" y="452" width="268" height="4" fill="#c98f62" opacity=".18"/>
+</svg>
