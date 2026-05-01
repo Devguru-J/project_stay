@@ -1615,6 +1615,21 @@
   background: color-mix(in srgb, var(--ember), #eee7d8 14%);
 }
 
+.app-footer {
+  margin-top: auto;
+  padding-top: 24px;
+  text-align: center;
+}
+
+.app-footer p {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  opacity: 0.6;
+}
+
 @keyframes veilFade {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -2195,22 +2210,56 @@
 @media (max-width: 1040px) {
   .app-shell {
     padding: 22px;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .room-stage {
+    max-width: 100%;
+    gap: 20px;
   }
 
   .room-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .room-list {
-    display: flex;
-    padding-bottom: 4px;
+    flex-direction: row;
     overflow-x: auto;
+    padding: 4px 2px 12px;
+    gap: 10px;
     scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    height: auto;
+  }
+
+  .room-list::-webkit-scrollbar {
+    display: none;
   }
 
   .room-card {
-    flex: 0 0 240px;
+    flex: 0 0 160px;
+    min-height: 100px;
+    padding: 14px;
     scroll-snap-align: start;
+  }
+
+  .room-card strong {
+    font-size: 16px;
+  }
+
+  .room-card small {
+    font-size: 11px;
+  }
+
+  .room-card__meta {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+
+  .active-room {
+    height: 640px;
   }
 
   .pixel-scene {
@@ -2237,6 +2286,7 @@
   }
 
   .manual-aside {
+    height: auto;
     padding: 16px;
   }
 
@@ -2261,19 +2311,21 @@
     padding: 16px;
   }
 
-  .topbar h1 {
-    font-size: 42px;
+  .topbar {
+    margin-bottom: 16px;
   }
 
-  .quiet-button {
-    width: 40px;
-    height: 40px;
+  .topbar h1 {
+    font-size: 24px;
+  }
+
+  .room-list {
+    margin-bottom: 4px;
   }
 
   .active-room {
-    height: 720px;
-    min-height: 640px;
-    padding: 18px;
+    height: 580px;
+    padding: 20px;
   }
 
   .pixel-scene {
@@ -2296,11 +2348,27 @@
 
   .room-header {
     flex-direction: column;
+    gap: 12px;
   }
 
   .room-header h2 {
-    font-size: clamp(27px, 8.4vw, 42px);
+    font-size: clamp(24px, 7vw, 32px);
     max-width: 100%;
+  }
+
+  .presence-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .presence-strip__group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .room-mute {
+    align-self: flex-start;
   }
 
   .message-bubble:nth-child(even) {
@@ -2322,5 +2390,14 @@
   .manual-aside__footer {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
+  }
+
+  .footer-links {
+    width: 100%;
+  }
+
+  .emotional-mailbox {
+    width: 100%;
   }
 }

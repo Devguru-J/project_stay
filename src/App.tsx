@@ -1099,6 +1099,10 @@ function App() {
           </div>
         </div>
       ) : null}
+
+      <footer className="app-footer">
+        <p>Created by Devguru-J</p>
+      </footer>
     </main>
   )
 }
