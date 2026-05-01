@@ -109,6 +109,22 @@ on conflict (id) do update set
 -- Production safety — added 2026-05-01
 -- ============================================================
 
+-- Suggestions table for feedback
+create table if not exists public.suggestions (
+  id uuid primary key default gen_random_uuid(),
+  visitor_id text not null,
+  body text not null check (char_length(body) between 1 and 300),
+  created_at timestamptz not null default now()
+);
+
+alter table public.suggestions enable row level security;
+
+drop policy if exists "anyone can suggest" on public.suggestions;
+create policy "anyone can suggest"
+on public.suggestions for insert
+to anon
+with check (true);
+
 -- Soft-moderation queue. Anon can insert. No anon read. Admin/service-role only.
 create table if not exists public.message_reports (
   id uuid primary key default gen_random_uuid(),
@@ -152,6 +168,30 @@ create trigger messages_rate_limit
 before insert on public.messages
 for each row execute function public.enforce_message_rate_limit();
 
+-- Rate limit: 1 suggestion per visitor per 5 minutes
+create or replace function public.enforce_suggestion_rate_limit()
+returns trigger
+language plpgsql
+as $$
+begin
+  if exists (
+    select 1 from public.suggestions
+    where visitor_id = new.visitor_id
+      and created_at > now() - interval '5 minutes'
+  ) then
+    raise exception using
+      errcode = 'P0001',
+      message = '잠깐 뒤에 다시 남겨주세요.';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists suggestions_rate_limit on public.suggestions;
+create trigger suggestions_rate_limit
+before insert on public.suggestions
+for each row execute function public.enforce_suggestion_rate_limit();
+
 -- Rate limit: 4 reactions per minute per visitor per room
 create or replace function public.enforce_reaction_rate_limit()
 returns trigger
@@ -186,6 +226,7 @@ set search_path = public
 as $$
   delete from public.messages where expires_at < now() - interval '1 hour';
   delete from public.room_reactions where expires_at < now() - interval '1 hour';
+  delete from public.suggestions where created_at < now() - interval '30 days';
   delete from public.message_nods
     where message_id not in (select id from public.messages);
   delete from public.message_reports where created_at < now() - interval '7 days';

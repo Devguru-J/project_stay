@@ -2,6 +2,7 @@ import { type CSSProperties, type FormEvent, useEffect, useMemo, useRef, useStat
 import {
   DoorOpen,
   HeartHandshake,
+  Mail,
   Moon,
   Music2,
   Send,
@@ -246,6 +247,11 @@ function App() {
   const [isLeaving, setIsLeaving] = useState(false)
   const [isAmbientOn, setIsAmbientOn] = useState(false)
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
+  const [isMailboxOpen, setIsMailboxOpen] = useState(false)
+  const [suggestion, setSuggestion] = useState('')
+  const [isSendingSuggestion, setIsSendingSuggestion] = useState(false)
+  const [suggestionSent, setSuggestionSent] = useState(false)
+  const [suggestionError, setSuggestionError] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
   const [sendCooldownLeft, setSendCooldownLeft] = useState(() => {
     const last = getLastSentAt()
@@ -521,6 +527,32 @@ function App() {
       ambientRef.current = null
     }
   }, [])
+
+  async function submitSuggestion(event: FormEvent) {
+    event.preventDefault()
+    if (!suggestion.trim() || !supabase) return
+
+    setIsSendingSuggestion(true)
+    setSuggestionError(null)
+    const { error } = await supabase
+      .from('suggestions')
+      .insert({
+        body: suggestion.trim(),
+        visitor_id: visitorId,
+      })
+
+    setIsSendingSuggestion(false)
+    if (error) {
+      setSuggestionError(error.message === 'P0001' ? '잠깐 뒤에 다시 남겨주세요.' : '쪽지를 보내지 못했습니다.')
+    } else {
+      setSuggestionSent(true)
+      setSuggestion('')
+      setTimeout(() => {
+        setSuggestionSent(false)
+        setIsMailboxOpen(false)
+      }, 2000)
+    }
+  }
 
   async function toggleAmbient() {
     if (isAmbientOn) {
@@ -893,7 +925,7 @@ function App() {
 
           <aside className="manual-aside" aria-label="사용 설명서">
             <div className="manual-aside__header">
-              <p className="eyebrow">small manual</p>
+              <p className="eyebrow">공간 사용법</p>
               <h2>해결보다 동행을 위한 곳</h2>
             </div>
             <ol>
@@ -923,21 +955,82 @@ function App() {
                 <DoorOpen size={16} />
                 조용히 나가기
               </button>
-              <span>
-                <Sparkles size={15} />
-                가입 없이, 이름 없이, 잠깐만 같이 있기
-              </span>
-              <button
-                className="privacy-link"
-                type="button"
-                onClick={() => setIsPrivacyOpen(true)}
-              >
-                이곳의 약속 →
-              </button>
+              
+              <div className="footer-notice">
+                <Sparkles size={14} />
+                <p>가입 없이 이름 없이, 잠깐만 같이 있기. 이곳의 말들은 24시간이 지나면 새벽 안개처럼 사라집니다.</p>
+              </div>
+
+              <div className="footer-links">
+                <button
+                  className="privacy-link"
+                  type="button"
+                  onClick={() => setIsPrivacyOpen(true)}
+                >
+                  이곳의 약속 →
+                </button>
+                <button
+                  className="emotional-mailbox"
+                  type="button"
+                  onClick={() => setIsMailboxOpen(true)}
+                  title="주인장에게 조용히 쪽지 보내기"
+                >
+                  <div className="emotional-mailbox__icon">
+                    <Mail size={16} />
+                  </div>
+                  <div className="emotional-mailbox__text">
+                    <strong>작은 우체통</strong>
+                    <span>조용한 제안 남기기</span>
+                  </div>
+                </button>
+              </div>
             </div>
           </aside>
         </div>
       </section>
+
+      {isMailboxOpen ? (
+        <div className="mailbox-veil" role="dialog" aria-modal="true" aria-label="작은 우체통">
+          <div className="mailbox-card">
+            <p className="eyebrow">small mailbox</p>
+            <h3>작은 우체통</h3>
+            <p>이곳이 조금 더 따뜻하고 편안해질 수 있는 방법이 있다면 알려주세요. 주인장이 조용히 읽어볼게요.</p>
+            
+            <form onSubmit={submitSuggestion}>
+              <textarea
+                maxLength={300}
+                placeholder="여기에 조용히 남겨주세요 (300자 이내)"
+                value={suggestion}
+                onChange={(e) => {
+                  setSuggestion(e.target.value)
+                  if (suggestionError) setSuggestionError(null)
+                }}
+                disabled={isSendingSuggestion || suggestionSent}
+              />
+              {suggestionError ? <p className="mailbox-error">{suggestionError}</p> : null}
+              <div className="mailbox-actions">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setIsMailboxOpen(false)
+                    setSuggestion('')
+                  }}
+                  disabled={isSendingSuggestion}
+                >
+                  닫기
+                </button>
+                <button 
+                  type="submit" 
+                  className="is-primary"
+                  disabled={isSendingSuggestion || suggestionSent || !suggestion.trim()}
+                >
+                  {suggestionSent ? '보냈어요' : isSendingSuggestion ? '보내는 중...' : '보내기'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
 
       {isPrivacyOpen ? (
         <div className="privacy-veil" role="dialog" aria-modal="true" aria-label="이곳의 약속">
