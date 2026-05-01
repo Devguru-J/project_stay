@@ -1098,8 +1098,26 @@
   background: rgba(238, 231, 216, 0.08);
 }
 
+.message-nod.is-nodded,
+.message-nod:disabled {
+  color: color-mix(in srgb, var(--room-accent), var(--soft-ink) 48%);
+  border-color: color-mix(in srgb, var(--room-accent), transparent 72%);
+  background: color-mix(in srgb, var(--room-accent), transparent 90%);
+  cursor: default;
+}
+
+.message-nod.is-nodded:hover,
+.message-nod:disabled:hover {
+  color: color-mix(in srgb, var(--room-accent), var(--soft-ink) 48%);
+  background: color-mix(in srgb, var(--room-accent), transparent 90%);
+}
+
 .message-nod:active {
   transform: translateY(1px) scale(0.98);
+}
+
+.message-nod:disabled:active {
+  transform: none;
 }
 
 .message-nod small {

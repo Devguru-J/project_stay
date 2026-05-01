@@ -1,9 +1,11 @@
 const VISITOR_KEY = 'project-stay-visitor-id'
 const COOLDOWN_KEY = 'project-stay-last-send'
 const HIDDEN_KEY = 'project-stay-hidden-messages'
+const NODDED_KEY = 'project-stay-nodded-messages'
 
 export const SEND_COOLDOWN_MS = 12 * 1000
 const MAX_HIDDEN = 200
+const MAX_NODDED = 500
 
 export function getVisitorId(): string {
   const current = window.localStorage.getItem(VISITOR_KEY)
@@ -39,4 +41,21 @@ export function loadHiddenSet(): Set<string> {
 export function persistHiddenSet(set: Set<string>): void {
   const list = Array.from(set).slice(-MAX_HIDDEN)
   window.localStorage.setItem(HIDDEN_KEY, JSON.stringify(list))
+}
+
+export function loadNoddedSet(): Set<string> {
+  try {
+    const raw = window.localStorage.getItem(NODDED_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return new Set()
+    return new Set(parsed.filter((x): x is string => typeof x === 'string'))
+  } catch {
+    return new Set()
+  }
+}
+
+export function persistNoddedSet(set: Set<string>): void {
+  const list = Array.from(set).slice(-MAX_NODDED)
+  window.localStorage.setItem(NODDED_KEY, JSON.stringify(list))
 }

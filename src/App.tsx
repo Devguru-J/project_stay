@@ -24,8 +24,10 @@ import {
   getLastSentAt,
   getVisitorId,
   loadHiddenSet,
+  loadNoddedSet,
   markSent,
   persistHiddenSet,
+  persistNoddedSet,
 } from './lib/visitor'
 
 type AmbientHandle = ReturnType<typeof startAmbient>
@@ -268,6 +270,7 @@ function App() {
   })
   const [sendError, setSendError] = useState<string | null>(null)
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => loadHiddenSet())
+  const [noddedIds, setNoddedIds] = useState<Set<string>>(() => loadNoddedSet())
   const messageStreamRef = useRef<HTMLDivElement | null>(null)
   const activeRoomRef = useRef<HTMLElement | null>(null)
   const ambientRef = useRef<AmbientHandle | null>(null)
@@ -337,6 +340,7 @@ function App() {
 
       const ids = (messageRows ?? []).map((message) => message.id)
       let nodCounts: Record<string, number> = {}
+      let ownNodIds: string[] = []
 
       if (ids.length > 0) {
         const { data: nodRows, error: nodError } = await client
@@ -350,10 +354,28 @@ function App() {
             return counts
           }, {})
         }
+
+        const { data: ownNodRows, error: ownNodError } = await client
+          .from('message_nods')
+          .select('message_id')
+          .eq('visitor_id', visitorId)
+          .in('message_id', ids)
+
+        if (!ownNodError) {
+          ownNodIds = (ownNodRows ?? []).map((nod) => nod.message_id)
+        }
       }
 
       if (!ignore) {
         setMessages((messageRows ?? []).map((message) => toMessage(message as MessageRow, nodCounts[message.id] ?? 0)))
+        if (ownNodIds.length > 0) {
+          setNoddedIds((current) => {
+            const next = new Set(current)
+            ownNodIds.forEach((id) => next.add(id))
+            persistNoddedSet(next)
+            return next
+          })
+        }
       }
     }
 
@@ -380,7 +402,7 @@ function App() {
     return () => {
       ignore = true
     }
-  }, [activeRoomId])
+  }, [activeRoomId, visitorId])
 
   useEffect(() => {
     if (!supabase) return
@@ -718,10 +740,19 @@ function App() {
   }
 
   async function addNod(messageId: string) {
+    if (noddedIds.has(messageId)) return
+
+    setNoddedIds((current) => {
+      const next = new Set(current)
+      next.add(messageId)
+      persistNoddedSet(next)
+      return next
+    })
+    setMessages((current) =>
+      current.map((message) => (message.id === messageId ? { ...message, nods: message.nods + 1 } : message)),
+    )
+
     if (!supabase || messageId.startsWith('local-')) {
-      setMessages((current) =>
-        current.map((message) => (message.id === messageId ? { ...message, nods: message.nods + 1 } : message)),
-      )
       return
     }
 
@@ -732,12 +763,28 @@ function App() {
 
     if (error) {
       console.warn('Could not save message nod.', error)
+      if (error.code === '23505') {
+        setMessages((current) =>
+          current.map((message) =>
+            message.id === messageId ? { ...message, nods: Math.max(0, message.nods - 1) } : message,
+          ),
+        )
+        return
+      }
+
+      setNoddedIds((current) => {
+        const next = new Set(current)
+        next.delete(messageId)
+        persistNoddedSet(next)
+        return next
+      })
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === messageId ? { ...message, nods: Math.max(0, message.nods - 1) } : message,
+        ),
+      )
       return
     }
-
-    setMessages((current) =>
-      current.map((message) => (message.id === messageId ? { ...message, nods: message.nods + 1 } : message)),
-    )
   }
 
   return (
@@ -882,35 +929,42 @@ function App() {
                   <p>먼저 한 줄을 놓아도 좋고, 누군가 들어올 때까지 그냥 같이 있어도 됩니다.</p>
                 </div>
               ) : (
-                roomMessages.map((message, index) => (
-                  <article
-                    className={`message-bubble message-bubble--${message.tone}`}
-                    key={message.id}
-                    style={{ '--rise-delay': `${index * 90}ms`, ...lifeStyle(message, now) } as CSSProperties}
-                  >
-                    <span>{message.name}</span>
-                    <p>{message.text}</p>
-                    <button
-                      className="message-nod"
-                      onClick={() => addNod(message.id)}
-                      type="button"
-                      aria-label={`${message.name}의 말에 공감하기`}
+                roomMessages.map((message, index) => {
+                  const hasNodded = noddedIds.has(message.id)
+
+                  return (
+                    <article
+                      className={`message-bubble message-bubble--${message.tone}`}
+                      key={message.id}
+                      style={{ '--rise-delay': `${index * 90}ms`, ...lifeStyle(message, now) } as CSSProperties}
                     >
-                      끄덕
-                      <small>{message.nods}</small>
-                    </button>
-                    <button
-                      className="message-hide"
-                      onClick={() => hideMessage(message.id)}
-                      type="button"
-                      aria-label="이 말 가리기"
-                      title="이 말은 이 기기에서 가립니다"
-                    >
-                      <X size={12} />
-                    </button>
-                    <i style={{ animationDelay: `${index * 130}ms` }} />
-                  </article>
-                ))
+                      <span>{message.name}</span>
+                      <p>{message.text}</p>
+                      <button
+                        aria-label={`${message.name}의 말에 공감하기`}
+                        aria-pressed={hasNodded}
+                        className={`message-nod${hasNodded ? ' is-nodded' : ''}`}
+                        disabled={hasNodded}
+                        onClick={() => addNod(message.id)}
+                        title={hasNodded ? '이미 끄덕였어요' : '작게 공감하기'}
+                        type="button"
+                      >
+                        {hasNodded ? '끄덕함' : '끄덕'}
+                        <small>{message.nods}</small>
+                      </button>
+                      <button
+                        className="message-hide"
+                        onClick={() => hideMessage(message.id)}
+                        type="button"
+                        aria-label="이 말 가리기"
+                        title="이 말은 이 기기에서 가립니다"
+                      >
+                        <X size={12} />
+                      </button>
+                      <i style={{ animationDelay: `${index * 130}ms` }} />
+                    </article>
+                  )
+                })
               )}
             </div>
 
