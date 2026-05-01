@@ -1034,12 +1034,6 @@ function App() {
               </span>
             </div>
 
-            <div className="room-whisper" aria-live="polite">
-              <span>오늘의 작은 문장</span>
-              <p>{dailyLine}</p>
-              <small>{roomTrace}</small>
-            </div>
-
             <div className="message-stream" ref={messageStreamRef} aria-live="polite">
               {roomMessages.length === 0 ? (
                 <div className="message-empty" role="status">
@@ -1124,6 +1118,12 @@ function App() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="room-whisper" aria-live="polite">
+                <span>오늘의 작은 문장</span>
+                <p>{dailyLine}</p>
+                <small>{roomTrace}</small>
               </div>
             </div>
 

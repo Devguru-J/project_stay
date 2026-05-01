@@ -1017,35 +1017,31 @@
 }
 
 .room-whisper {
-  position: absolute;
-  right: 32px;
-  bottom: 132px;
-  z-index: 4;
+  position: relative;
+  z-index: 2;
+  flex: 1 1 220px;
   display: grid;
   gap: 4px;
-  width: 250px;
-  margin: 0;
-  padding: 9px 12px 10px;
+  max-width: 300px;
+  margin: 0 0 0 auto;
+  padding: 0 12px 0 0;
   text-align: right;
-  border-radius: 10px 0 0 10px;
   border-right: 1px solid color-mix(in srgb, var(--room-accent), transparent 56%);
-  background:
-    linear-gradient(270deg, rgba(20, 27, 25, 0.5), rgba(20, 27, 25, 0.14) 76%, transparent),
-    linear-gradient(270deg, color-mix(in srgb, var(--room-accent), transparent 88%), transparent);
+  background: transparent;
 }
 
 .room-whisper span,
 .room-whisper small {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 10px;
 }
 
 .room-whisper p {
   margin: 0;
   color: var(--soft-ink);
-  font-size: 13.5px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.35;
   word-break: keep-all;
   text-wrap: pretty;
 }
@@ -2657,12 +2653,12 @@
   }
 
   .room-whisper {
-    right: 12px;
-    bottom: 118px;
+    flex: 1 0 100%;
     gap: 2px;
-    width: min(42%, 164px);
-    margin: 0;
-    padding: 6px 8px;
+    width: auto;
+    max-width: none;
+    margin: -1px 0 0;
+    padding: 0 8px 0 0;
   }
 
   .room-whisper span,
