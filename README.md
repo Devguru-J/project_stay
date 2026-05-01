@@ -84,6 +84,7 @@
 - 방마다 하루에 하나씩 `오늘의 작은 문장`이 보입니다.
 - 누군가 방금 다녀간 듯한 작은 흔적 문장이 방 안에 남습니다.
 - 말을 남기지 않고도 `작은 사물 놓기`로 종이컵, 우산, 막차표 같은 오브젝트를 놓고 갈 수 있습니다.
+- `작은 사물 놓기`를 누르면 방 안에 작은 픽셀 사물이 무작위 위치로 떨어졌다가 몇 초 뒤 사라집니다.
 - 공감을 누르면 방 배경이 아주 작게 밝아집니다.
 - 조용히 나갈 때 방마다 다른 마무리 문장이 표시됩니다.
 
@@ -112,6 +113,8 @@ Supabase Realtime을 사용해 다음 숫자가 실시간으로 갱신됩니다.
 - 클라이언트에서 12초 메시지 전송 쿨다운을 둡니다.
 - 욕설, 링크, 이메일, 전화번호처럼 보이는 패턴, 반복 글자 스팸을 막습니다.
 - 서버에서는 RLS, rate-limit trigger, 길이 제한을 둡니다.
+- 서버에서는 익명 입력값의 길이와 허용 공감 라벨을 한 번 더 제한합니다.
+- 정적 배포에는 MIME 스니핑, iframe 삽입, 과한 브라우저 권한을 막는 보안 헤더를 둡니다.
 - 메시지는 로컬에서 `가리기` 할 수 있습니다.
 - 신고/관리 흐름을 위한 `message_reports` 테이블이 준비되어 있습니다.
 
@@ -134,10 +137,13 @@ Supabase Realtime을 사용해 다음 숫자가 실시간으로 갱신됩니다.
 - 데스크톱 레이아웃 여백과 footer 위치 정리
 - 방 카드 표면감 개선
 - 오늘의 작은 문장, 작은 사물 놓기, 방문 흔적, 나가기 문장 추가
+- 작은 사물 놓기 클릭 시 픽셀 사물이 떨어졌다 사라지는 장면 효과 추가
 - Pretendard 기반 한글 폰트 적용
 - 하단 사용 설명서/서비스 목적 문구 추가
 - `Created by Devguru-J` 크레딧 정리
 - Open Graph, Twitter card, JSON-LD, sitemap, robots 설정
+- Googlebot 메타, canonical 정렬, Search Console 등록 절차 정리
+- 정적 보안 헤더와 Supabase 입력 제약 강화
 - GitHub repository 연결 및 push
 
 ---
@@ -164,6 +170,7 @@ Supabase Realtime을 사용해 다음 숫자가 실시간으로 갱신됩니다.
 ├── docs/
 │   └── launch-checklist.md
 ├── public/
+│   ├── _headers
 │   ├── _redirects
 │   ├── favicon.svg
 │   ├── manifest.json
@@ -280,11 +287,14 @@ SPA fallback은 `public/_redirects`에서 처리합니다.
 - Twitter card meta tags
 - `og:image:width`, `og:image:height`, `og:image:alt`
 - canonical URL
+- Googlebot indexing hint
 - JSON-LD structured data
 - `public/sitemap.xml`
 - `public/robots.txt`
 
 현재 기준 대표 URL은 `https://staytogether.net/`입니다.
+
+구글 검색 노출을 위해서는 코드 준비와 별개로 Google Search Console에서 도메인 소유권을 인증하고 `https://staytogether.net/sitemap.xml`을 제출해야 합니다. 자세한 절차는 [`docs/launch-checklist.md`](./docs/launch-checklist.md)에 정리했습니다.
 
 ---
 

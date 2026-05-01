@@ -6,7 +6,7 @@
 2. Run `supabase/schema.sql` in the SQL editor. It creates:
    - `rooms`, `messages`, `room_reactions`, `message_nods`, `message_reports`
    - RLS policies for `anon` (read/insert only what's needed)
-   - Body length check (1–64 chars)
+   - Body length check (1–64 chars), visitor/display-name length checks, allowed reaction labels
    - Rate-limit triggers: 1 message / 12s per visitor, 4 reactions / minute per visitor per room
    - `purge_expired()` cleanup function
 3. **Realtime**: in the Database → Replication settings, enable Realtime for `messages`, `room_reactions`, `message_nods`.
@@ -34,6 +34,8 @@
 
 - Client-side: 12-second send cooldown, Korean profanity/slur blocklist, spam pattern guard (links, emails, phone-like, repeated chars), per-message local `가리기` (hide).
 - Server-side: rate-limit triggers + RLS check on body length + `expires_at` filter.
+- Database constraints: visitor/display-name length checks, allowed room-reaction labels, nods only for non-expired messages.
+- Static headers: `public/_headers` blocks MIME sniffing, framing, and unused browser permissions.
 - Soft-moderation queue: anon insert into `message_reports`, no anon read. Admin reviews with the service-role key.
 - Privacy modal exposed via `이곳의 약속` link in the manual aside.
 
@@ -43,6 +45,7 @@
 - [x] Add Open Graph, Twitter card, canonical URL, JSON-LD, `robots.txt`, and `sitemap.xml`.
 - [x] Add static security headers via `public/_headers`.
 - [x] Add a small manual/usage copy for first-time visitors.
+- [x] Add falling quiet-object effect for `작은 사물 놓기`.
 - [x] Configure the public domain copy around `https://staytogether.net/`.
 - [ ] Self-host Pretendard Variable WOFF2 if CDN dependency should be removed.
 - [ ] Add a privacy-respecting analytics layer (Cloudflare Web Analytics or Plausible). No event-level content.
