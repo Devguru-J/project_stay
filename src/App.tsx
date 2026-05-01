@@ -1,4 +1,4 @@
-import { type CSSProperties, type FormEvent, useEffect, useState } from 'react'
+import { type CSSProperties, type FormEvent, useEffect, useRef, useState } from 'react'
 import {
   DoorOpen,
   HeartHandshake,
@@ -183,6 +183,7 @@ function App() {
   const [onlineCount, setOnlineCount] = useState<number | null>(null)
   const [visitorId] = useState(getVisitorId)
   const [companionName] = useState(() => names[Math.floor(Math.random() * names.length)])
+  const messageStreamRef = useRef<HTMLDivElement | null>(null)
 
   const activeRoom = rooms.find((room) => room.id === activeRoomId) ?? rooms[0]
   const roomMessages = messages.filter((message) => message.roomId === activeRoom.id)
@@ -197,6 +198,14 @@ function App() {
 
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    const stream = messageStreamRef.current
+
+    if (!stream) return
+
+    stream.scrollTop = stream.scrollHeight
+  }, [roomMessages.length, activeRoomId])
 
   useEffect(() => {
     if (!supabase) return
@@ -559,7 +568,7 @@ function App() {
               </span>
             </div>
 
-            <div className="message-stream" aria-live="polite">
+            <div className="message-stream" ref={messageStreamRef} aria-live="polite">
               {roomMessages.map((message, index) => (
                 <article className={`message-bubble message-bubble--${message.tone}`} key={message.id}>
                   <span>{message.name}</span>

@@ -193,6 +193,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  height: min(72vh, 760px);
   min-height: 692px;
   padding: 34px;
   overflow: hidden;
@@ -850,10 +851,28 @@
   position: relative;
   z-index: 2;
   display: grid;
+  align-content: end;
   gap: 16px;
   max-width: 620px;
-  margin-top: auto;
-  padding: 96px 0 28px;
+  min-height: 0;
+  margin-top: 28px;
+  padding: 72px 10px 24px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(238, 231, 216, 0.22) transparent;
+  scrollbar-width: thin;
+  flex: 1 1 auto;
+}
+
+.message-stream::-webkit-scrollbar {
+  width: 8px;
+}
+
+.message-stream::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(238, 231, 216, 0.18);
+  background-clip: content-box;
 }
 
 .message-bubble {
@@ -1453,6 +1472,7 @@
   }
 
   .active-room {
+    height: 720px;
     min-height: 640px;
     padding: 18px;
   }
